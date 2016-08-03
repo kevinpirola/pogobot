@@ -12,11 +12,9 @@ login.login('username925363', 'password')
     // Make some API calls!
     return client.getInventory(0);
 }, (err)=>{console.log(err);}).then(inventory => {
-	console.log(inventory.inventory_delta.inventory_items);
-	inventory.inventory_delta.inventory_items.forEach( item =>{ 
-		console.log(item);
-		var data = inventory_item_data.pokemon_data;
-		if(data){
+	inventory.inventory_delta.inventory_items.forEach((item) =>{ 
+	var data = item.inventory_item_data.pokemon_data;
+		if(data!==null){
 			console.log('+--------------------------');
 			console.log('POKEMON: ' + data.pokemon_id);
 			console.log('Attack: ' + data.individual_attack);
