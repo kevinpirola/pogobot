@@ -1,0 +1,27 @@
+{
+  "name": "pogobot",
+  "version": "0.0.1",
+  "description": "Pokemon Go Bot that aim to be undetectable",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinpirola/pogobot.git"
+  },
+  "keywords": [
+    "pokemongo",
+    "bot"
+  ],
+  "author": "kevinpirola, ziotob",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/kevinpirola/pogobot/issues"
+  },
+  "homepage": "https://github.com/kevinpirola/pogobot#readme",
+  "dependencies": {
+    "node-pogo-protos": "^1.1.2",
+    "pogobuf": "^1.4.0"
+  }
+}
