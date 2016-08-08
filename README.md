@@ -1,4 +1,6 @@
 # PogoBot
+[WARNING]
+This is likely to be not legal for Niantic and might led your account to a ban. Use at your own risk. The team can't be responsible for your loss. Doing anything of the following guide state that you agree with this. Every information (username or password) will not be stored anywhere in our systems.
 ## Introduction
 I am a pokémon fan, I am a Pokémon Go player, I am a software developer, I am an open source fan.
 The aim of this project is to create something that can be used by Pokémon Go player in order to improve their game experience.
@@ -43,7 +45,7 @@ The IV calculator is a tool that can read the list of all your pokemon from your
 ##Installation and run
 To run the application on your laptop there are a variety of pre-requisite that you need to fulfill.
 ###Operative System
-This guide is intended for OSX user (Apple) or Linux users (teste on Ubuntu14 and Centos7). Sorry windows user, your days are over, you will need to figure yourself how to deal with this configuration.
+This guide is intended for OSX users (Apple) or Linux users (teste on Ubuntu14 and Centos7). Sorry windows users, your days are over, you will need to figure yourself how to deal with this configuration.
 ###GIT
 The project is of course on GitHub, so you will need to install Git on your machine.
 Apple users will thank Steve, for the Mac is shipped with Git pre-installed.
@@ -58,7 +60,7 @@ will return something like:
 ```
 git version 1.8.3.1
 ```
-###NODE
+###NodeJS
 The project is developed in javascript and uses the framework nodejs both to run the code and to manage dependencies (with node package manager - npm).
 To install node run this:
 ```
@@ -70,3 +72,40 @@ and if you run `node -v && npm -v` you should get something like:
 v4.4.7
 2.15.8
 ```
+
+for MacOSX users you can follow one of the hundreds of guide available in the net like this: [Guide](http://blog.teamtreehouse.com/install-node-js-npm-mac) or just go to the official site [NodeJS](http://www.nodejs.org) and install it with the installer.
+###Downloading the code
+Now you are ready to start, you will need to copy the project in your machine.
+Open a terminal, navigate to the folder that you like the project to be in (use `cd` to change dirs, `mkdir` to create new folders).In my case I will put the project inside my Documents folder like this:
+```
+cd ~/Documents
+```
+Then, to clone the repository run:
+```
+git clone https://github.com/kevinpirola/pogobot.git
+```
+and wait the end.
+Once finished git should have added a folder called `pogobot/` inside your starting folder. To check just list the files with `ls`.
+
+The project is changing hours by ours, to keep your code up-to-date just run:
+```
+git pull origin master
+```
+
+In future I will add different branches and tagged releases.
+###Installing the dependencies
+When you have cloned the repository navigate to the root folder (for example `cd ~/Documents/pogobot/`) and run:
+```
+npm install
+```
+
+###Run
+To run the IV calculator you have to type:
+```
+node runbot.js -u yourUsername -p yourPassword
+```
+
+You can also use various dependencies like:
+ * `-a` to specify the login method (it can be either ptc or google)
+ * `-o` to specify how you want the list of pokemon to be ordered (ab: alphabetically, IV: by IV, cp: by CP, name)
+
