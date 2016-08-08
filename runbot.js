@@ -17,8 +17,17 @@ function alphabetic(a, b){
 }
 
 function cp(a, b){
-	if(a.cp < b.cp) return -1;
-	if(a.cp > b.cp) return 1;
+	if(a.cp > b.cp) return -1;
+	if(a.cp < b.cp) return 1;
+	return 0;
+}
+
+function iv(a, b){
+	var tota = a.individual_attack + a.individual_defense + a.individual_stamina;
+	var totb = b.individual_attack + b.individual_defense + b.individual_stamina;
+
+	if(tota > totb) return -1;
+	if(tota < totb) return 1;
 	return 0;
 }
 
@@ -73,6 +82,8 @@ if(o){
 		order = alphabetic;
 	} else if(o === 'cp'){
 		order = cp;
+	} else if(o === 'iv' || o === 'IV'){
+		order = iv;
 	} else {
 		console.log('Order method not supported');
 		process.exit(2);
