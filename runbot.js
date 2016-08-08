@@ -30,7 +30,7 @@ login.login('username925363', 'password')
 		}
 		
 	});
-try{
+/*try{
 	setInterval(()=>{
 		var cellIDs = pogobuf.Utils.getCellIDs(lat,lon);
 		return bluebird.resolve(client.getMapObjects(cellIDs, Array(cellIDs.length).fill(0))).then(mapObjects => {return mapObjects.map_cells;
@@ -44,6 +44,6 @@ try{
 	}, 10*1000);
 } catch(e){
 	console.log(e);
-}
+}*/
     // Use the returned data
 });
