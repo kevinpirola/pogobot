@@ -49,13 +49,14 @@ login.login(argv.u, argv.p)
 }, (err)=>{console.log(err);}).then(inventory => {
 	inventory.inventory_delta.inventory_items.forEach((item) =>{ 
 	var data = item.inventory_item_data.pokemon_data;
-		if(data!==null){
+		if(data!==null && !data.is_egg){
 			var atk = data.individual_attack;
 			var dfs = data.individual_defense;
 			var stm = data.individual_stamina;
 			
 			console.log('+--------------------------');
 			console.log('POKEMON: ' + pokemonList[data.pokemon_id].name);
+			console.log('CP: ' + data.cp);
 			console.log('Attack: ' + atk);
 			console.log('Defense: ' + dfs);
 			console.log('Stamina: ' + stm);
