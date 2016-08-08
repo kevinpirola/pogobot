@@ -23,6 +23,7 @@
   "dependencies": {
     "bluebird": "^3.4.1",
     "long": "^3.2.0",
+    "minimist": "^1.2.0",
     "node-pogo-protos": "^1.1.2",
     "pogobuf": "git://github.com/cyraxx/pogobuf.git#5606551404a135e505a4c6c8d21e40a0a8c02833",
     "s2-geometry": "^1.2.7"

@@ -6,6 +6,12 @@ const pogobuf = require('pogobuf'),
 const lat = 45.510798,
       lon = 12.234108;
 
+const pokemonList = require('./data/pokemon.json');
+
+var argv = require('minimist')(process.argv.slice(2));
+
+console.log(argv);
+
 var login = new pogobuf.PTCLogin(),
     client = new pogobuf.Client();
 login.login('username925363', 'password')
@@ -21,11 +27,18 @@ login.login('username925363', 'password')
 	inventory.inventory_delta.inventory_items.forEach((item) =>{ 
 	var data = item.inventory_item_data.pokemon_data;
 		if(data!==null){
+			var atk = data.individual_attack;
+			var dfs = data.individual_defense;
+			var stm = data.individual_stamina;
+			
 			console.log('+--------------------------');
-			console.log('POKEMON: ' + data.pokemon_id);
-			console.log('Attack: ' + data.individual_attack);
-			console.log('Defense: ' + data.individual_defense);
-			console.log('Stamina: ' + data.individual_stamina);
+			console.log('POKEMON: ' + pokemonList[data.pokemon_id].name);
+			console.log('Attack: ' + atk);
+			console.log('Defense: ' + dfs);
+			console.log('Stamina: ' + stm);
+			
+			var IV = (atk + dfs + stm)/0.45;
+			console.log('IV: ' + IV + '%');	
 			console.log('');
 		}
 		
