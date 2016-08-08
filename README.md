@@ -1,5 +1,5 @@
 # PogoBot
-[WARNING]
+[WARN]
 This is likely to be not legal for Niantic and might led your account to a ban. Use at your own risk. The team can't be responsible for your loss. Doing anything of the following guide state that you agree with this. Every information (username or password) will not be stored anywhere in our systems.
 ## Introduction
 I am a pokémon fan, I am a Pokémon Go player, I am a software developer, I am an open source fan.
