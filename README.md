@@ -51,6 +51,22 @@ In linux you can use apt-get (or yum or similar) like this:
 ```sudo apt-get install git```
 
 Once Git is installed, running this:
-```git --version```
+```
+git --version
+```
 will return something like:
-```git version 1.8.3.1```
+```
+git version 1.8.3.1
+```
+###NODE
+The project is developed in javascript and uses the framework nodejs both to run the code and to manage dependencies (with node package manager - npm).
+To install node run this:
+```
+sudo apt-get install nodejs
+sudo apt-get install npm
+```
+and if you run `node -v && npm -v` you should get something like:
+```
+v4.4.7
+2.15.8
+```
