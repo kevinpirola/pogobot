@@ -8,6 +8,37 @@ const lat = 45.510798,
 
 const pokemonList = require('./data/pokemon.json');
 
+function alphabetic(a, b){
+	var na = pokemonList[a.pokemon_id].name;
+	var nb = pokemonList[b.pokemon_id].name;
+	if(na < nb) return -1;
+	if(na > nb) return 1;
+	return 0;
+}
+
+function cp(a, b){
+	if(a.cp < b.cp) return -1;
+	if(a.cp > b.cp) return 1;
+	return 0;
+}
+
+function printData(data){
+	var atk = data.individual_attack;
+	var dfs = data.individual_defense;
+	var stm = data.individual_stamina;
+
+	console.log('+--------------------------');
+	console.log('POKEMON: ' + pokemonList[data.pokemon_id].name);
+	console.log('CP: ' + data.cp);
+	console.log('Attack: ' + atk);
+	console.log('Defense: ' + dfs);
+	console.log('Stamina: ' + stm);
+
+	var IV = (atk + dfs + stm)/0.45;
+	console.log('IV: ' + IV + '%');
+	console.log('');
+}
+
 var argv = require('minimist')(process.argv.slice(2));
 
 if(!argv.u){
@@ -35,6 +66,20 @@ if(argv.a){
 	loginMethod = 'ptc';
 }
 
+var order = cp;
+var o = argv.o;
+if(o){
+	if(o === 'ab' || o === 'alphabetic'){
+		order = alphabetic;
+	} else if(o === 'cp'){
+		order = cp;
+	} else {
+		console.log('Order method not supported');
+		process.exit(2);
+	}
+	
+}
+var pkmns = [];
 
 var client = new pogobuf.Client();
 login.login(argv.u, argv.p)
@@ -50,22 +95,12 @@ login.login(argv.u, argv.p)
 	inventory.inventory_delta.inventory_items.forEach((item) =>{ 
 	var data = item.inventory_item_data.pokemon_data;
 		if(data!==null && !data.is_egg){
-			var atk = data.individual_attack;
-			var dfs = data.individual_defense;
-			var stm = data.individual_stamina;
-			
-			console.log('+--------------------------');
-			console.log('POKEMON: ' + pokemonList[data.pokemon_id].name);
-			console.log('CP: ' + data.cp);
-			console.log('Attack: ' + atk);
-			console.log('Defense: ' + dfs);
-			console.log('Stamina: ' + stm);
-			
-			var IV = (atk + dfs + stm)/0.45;
-			console.log('IV: ' + IV + '%');	
-			console.log('');
+			pkmns.push(data);
 		}
-		
+	});
+	pkmns.sort(order);
+	pkmns.forEach((pk)=>{
+		printData(pk);
 	});
 /*try{
 	setInterval(()=>{
