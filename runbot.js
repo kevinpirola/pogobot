@@ -10,13 +10,36 @@ const pokemonList = require('./data/pokemon.json');
 
 var argv = require('minimist')(process.argv.slice(2));
 
-console.log(argv);
+if(!argv.u){
+	console.log('You should specify a username using: -u <yourUsername>');
+	process.exit(1);
+}
+if(!argv.p){
+	console.log('You should specify a password using: -p <yourPassword>');
+	process.exit(1);
+}
+var login, loginMethod;
+if(argv.a){
+	if(argv.a === 'ptc'){
+		login = new pogobuf.PTCLogin();
+		loginMethod = 'ptc';
+	} else if(argv.a === 'google'){
+		login = new pogobuf.GoogleLogin();
+		loginMethod = 'google';
+	} else {
+		console.log('ERROR, you specified an invalid login method. Current valid method are ptc or google');
+	}
+} else {
+	console.log('No login method specified, using PTC as default');
+	login = new pogobuf.PTCLogin();
+	loginMethod = 'ptc';
+}
 
-var login = new pogobuf.PTCLogin(),
-    client = new pogobuf.Client();
-login.login('username925363', 'password')
+
+var client = new pogobuf.Client();
+login.login(argv.u, argv.p)
 .then(token => {
-    client.setAuthInfo('ptc', token);
+    client.setAuthInfo(loginMethod, token);
     client.setPosition(lat, lon);
     return client.init();
 }).then(() => {
