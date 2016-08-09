@@ -3,8 +3,8 @@ const pogobuf = require('pogobuf'),
       bluebird = require('bluebird'),
       Long = require('long');
 
-const lat = 45.510798,
-      lon = 12.234108;
+/*const lat = 45.510798,
+      lon = 12.234108;*/
 
 const pokemonList = require('./data/pokemon.json');
 
@@ -98,13 +98,30 @@ if(o){
 	}
 	
 }
+
+var loc = null;
+var lat,lon;
+if(argv.l){
+	var split = argv.l.split(', ');
+	if(split.length !== 2){
+		split = argv.l.split(' ');
+	}
+	if(split.length !== 2){
+		console.log('ERROR, coord format not valid. A valid format is: "45.000, 12.0000" or "45.0000 12.0000"');
+		process.exit(3);
+	}
+	lat = parseFloat(split[0]);
+	lon = parseFloat(split[1]);
+}
 var pkmns = [];
 
 var client = new pogobuf.Client();
 login.login(argv.u, argv.p)
 .then(token => {
-    client.setAuthInfo(loginMethod, token);
-    client.setPosition(lat, lon);
+	client.setAuthInfo(loginMethod, token);
+	if(lat && lon){
+		client.setPosition(lat, lon);
+	}
     return client.init();
 }).then(() => {
     console.log('login successful');
