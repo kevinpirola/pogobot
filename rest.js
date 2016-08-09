@@ -26,7 +26,9 @@ router.get('/', function(req, res) {
 
 router.route('/login')
 	.post((req, res) => {
-		res.send(req);
+		console.log('[PogoBot] Received login request for user: ' + req.body.user);
+		res.send('Hello ' + req.body.user);
+		//res.json(req.body);
 	});
 
 app.use('/api', router);
