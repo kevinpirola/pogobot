@@ -70,6 +70,9 @@ router.get('/', function (req, res) {
     });
 });
 
+/**
+ * REST SERVICE TO OBTAIN A TOKEN FROM GOOGLE LOGIN SERVICE
+ */
 router.route('/login')
     .post((req, res) => {
         console.log('[PogoBot] Received login request for user: ' + req.body.user.username);
@@ -92,6 +95,27 @@ router.route('/login')
                 message: 'Unable to login'
             });
         })
+    });
+
+router.route('/user/:token/:lt/pkmns')
+    .get((req, res) => {
+        var client = new pogobuf.Client();
+        client.setAuthInfo(req.params.lt, req.params.token);
+        client.init().then(() => {
+            return client.getInventory(0);
+        }).then((inventory) => {
+            var pkmns = [];
+            inventory.inventory_delta.inventory_items.forEach((item) => {
+                var data = item.inventory_item_data.pokemon_data;
+                if (data !== null && !data.is_egg) {
+                    pkmns.push(data);
+                }
+            });
+            res.status(200).json({
+                message: 'List retreived successfully',
+                data: pkmns
+            });
+        });
     });
 
 app.use('/api', router);
