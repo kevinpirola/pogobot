@@ -63,7 +63,7 @@ git version 1.8.3.1
 ```
 ###NodeJS
 The project is developed in javascript and uses the framework nodejs both to run the code and to manage dependencies (with node package manager - npm).
-To install node run this:
+To install node (on linux) run this:
 ```
 sudo apt-get install nodejs
 sudo apt-get install npm
