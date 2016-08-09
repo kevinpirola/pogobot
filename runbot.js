@@ -31,6 +31,12 @@ function iv(a, b){
 	return 0;
 }
 
+function number(a, b){
+	if(a.pokemon_id < b.pokemon_id) return -1;
+	if(a.pokemon_id > b.pokemon_id) return 1;
+	return 0;
+}
+
 function printData(data){
 	var atk = data.individual_attack;
 	var dfs = data.individual_defense;
@@ -84,6 +90,8 @@ if(o){
 		order = cp;
 	} else if(o === 'iv' || o === 'IV'){
 		order = iv;
+	} else if(o === 'n' || o === 'number'){
+		order = number;
 	} else {
 		console.log('Order method not supported');
 		process.exit(2);
