@@ -76,7 +76,7 @@ v4.4.7
 2.15.8
 ----
 
-for MacOSX users you can follow one of the hundreds of guide available in the net like this: [Guide](http://blog.teamtreehouse.com/install-node-js-npm-mac) or just go to the official site [NodeJS](http://www.nodejs.org) and install it with the installer.
+for MacOSX users you can follow one of the hundreds of guide available in the net like this: http://blog.teamtreehouse.com/install-node-js-npm-mac[Guide] or just go to the official site http://www.nodejs.org[NodeJS] and install it with the installer.
 === Downloading the code
 Now you are ready to start, you will need to copy the project in your machine.
 Open a terminal, navigate to the folder that you like the project to be in (use `cd` to change dirs, `mkdir` to create new folders).In my case I will put the project inside my Documents folder like this:
