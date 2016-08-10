@@ -1,32 +1,65 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<script>
-function pogoLogin() {
-	var username = document.getElementById('username').value;
-	var password = document.getElementById('password').value;
-
-	// DO LOGIN
-
-	// GET LIST
-
-	// APPEND LIST ELEMENT TO BODY
-}
-</script>
+    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
 </head>
 
 <body>
 
-<h1>PogoBot IV Calculator - (alpha)</h1>
+    <h1>PogoBot IV Calculator - (pre-alpha)</h1>
 
-<p id="demo">This tool is used to calculate your pokemon's IV precisely</p>
+    <p id="demo">This tool is used to calculate your pokemon's IV precisely</p>
 
-<form name="login">
-<input type="text" name="username" id="username">
-<input type="password" name="password" id="password">
-</form>
-<button type="button" onclick="pogoLogin()">Get pokemon list</button>
+    <form name="login">
+        <input type="text" name="username" id="username">
+        <input type="password" name="password" id="password">
+        <input type="checkbox" name="loginType" id="logtype"> Google Login
+        <select id="order">
+            <option value="iv">IV</option>
+            <option value="number">Number</option>
+            <option value="cp">CP</option>
+            <option value="name">Name</option>
+        </select>
+    </form>
+    <button type="button" onclick="pogoLogin()">Get pokemon list</button>
 
+    <script>
+        function pogoLogin() {
+            var username = $('#username').val();
+            var password = $('#password').val();
+            var loginType = ($('#logtype').prop('checked')) ? 'google' : 'ptc';
+            var order = $('#order').val();
+
+            $.ajax('http://kevinpirola.ddns.net:8080/api/login', {
+                data: {
+                    user: {
+                        username: username,
+                        password: password
+                    },
+                    loginType: loginType
+                },
+                type: 'POST',
+                dataType: 'json'
+            }).then(function (data) {
+                console.log('logged');
+                $.get('http://kevinpirola.ddns.net:8080/api/user/' + data.token + '/' + loginType + '/pkmns/order/' + order).then(res => {
+                    var pkmnList = res.data;
+                    pkmnList.forEach(p => {
+                        $('body').append('<hr>');
+                        $('body').append('<p>' + p.pokemon_name + '</p>');
+                        $('body').append('<p>CP: ' + p.cp + '</p>');
+                        $('body').append('<p>Attack: ' + p.individual_attack + '</p>');
+                        $('body').append('<p>Defense: ' + p.individual_defense + '</p>');
+                        $('body').append('<p>Stamina: ' + p.individual_stamina + '</p>');
+                        $('body').append('<p>' + p.iv + '</p>');
+                    });
+                });
+            }).catch(function (arg) {
+                console.log(arg);
+            });
+        }
+    </script>
 </body>
-</html>
 
+</html>
