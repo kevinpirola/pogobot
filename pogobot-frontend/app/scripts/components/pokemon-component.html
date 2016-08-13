@@ -1,0 +1,19 @@
+<div class="card">
+    <div class="card-title">
+        {{$ctrl.pokemon.pokemon_name}}
+    </div>
+    <div class="card-image">
+        <img class="img-responsive" ng-src="http://www.pokestadium.com/sprites/xy/{{($ctrl.pokemon.pokemon_name === 'nidoran♀' ? 'nidoranf' : ($ctrl.pokemon.pokemon_name === 'nidoran' ? 'nidoranm' : $ctrl.pokemon.pokemon_name )) | lowercase | formatpkmn }}.gif">
+    </div>
+    <div class="card-cp">
+        {{$ctrl.pokemon.cp}}</div>
+
+    <div class="card-content"></div>
+
+    <div class="card-action">
+        <p>ATK: {{$ctrl.pokemon.individual_attack}}</p>
+        <p>DEF: {{$ctrl.pokemon.individual_defense}}</p>
+        <p>STM: {{$ctrl.pokemon.individual_stamina}}</p>
+        <p class="iv">IV: {{$ctrl.pokemon.iv | number : 2}} %</p>
+    </div>
+</div>

@@ -132,6 +132,7 @@ router.route('/login')
                 token: us.getToken()
             });
         }, (err) => {
+            console.log(err);
             res.status(401).json({
                 message: 'Unable to login'
             });
@@ -144,6 +145,11 @@ router.route('/user/:token/:lt/pkmns/order/:order')
         client.setAuthInfo(req.params.lt, req.params.token);
         client.init().then(() => {
             return client.getInventory(0);
+        }, (err) => {
+            console.log(err);
+            res.status(500).json({
+                message: 'Errored'
+            });
         }).then((inventory) => {
             var pkmns = [];
             inventory.inventory_delta.inventory_items.forEach((item) => {

@@ -2,90 +2,120 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/boots
 // bower:scss
 @import "bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
 // endbower
-
-.browsehappy {
-  margin: 0.2em 0;
-  background: #ccc;
-  color: #000;
-  padding: 0.2em 0;
+.card {
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
-body {
-  padding: 0;
+.card {
+    margin-top: 10px;
+    box-sizing: border-box;
+    border-radius: 2px;
+    background-clip: padding-box;
+    padding: 20px;
+    .card-title {
+        color: #000;
+        font-size: 24px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    .card-image {
+        text-align: center;
+        border-top: 1px solid rgba(160, 160, 160, 0.2);
+        padding-top: 15px;
+        margin-bottom: 15px;
+        height: 120px;
+        line-height: 120px;
+        img {
+            display: inline-block;
+        }
+    }
+    .card-cp {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    .card-content {
+        border-top: 1px solid rgba(160, 160, 160, 0.2);
+        padding-top: 15px;
+    }
+    .card-action {
+        border-top: 1px solid rgba(160, 160, 160, 0.2);
+        padding: 16px;
+        .iv {
+            font-weight: bold;
+            font-size: 24px;
+        }
+        p {
+            text-align: center;
+        }
+    }
 }
 
-/* Everything but the jumbotron gets side spacing for mobile first views */
-.header,
-.marketing,
-.footer {
-  padding-left: 15px;
-  padding-right: 15px;
+.card .card-image img {
+    border-radius: 2px 2px 0 0;
+    background-clip: padding-box;
+    position: relative;
+    z-index: -1;
 }
 
-/* Custom page header */
-.header {
-  border-bottom: 1px solid #e5e5e5;
-  margin-bottom: 10px;
-
-  /* Make the masthead heading the same height as the navigation */
-  h3 {
-    margin-top: 0;
-    margin-bottom: 0;
-    line-height: 40px;
-    padding-bottom: 19px;
-  }
+.card .card-image span.card-title {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 16px;
 }
 
-/* Custom page footer */
-.footer {
-  padding-top: 19px;
-  color: #777;
-  border-top: 1px solid #e5e5e5;
+.card .card-content {
+    padding: 16px;
+    border-radius: 0 0 2px 2px;
+    background-clip: padding-box;
+    box-sizing: border-box;
 }
 
-.container-narrow > hr {
-  margin: 30px 0;
+.card .card-content p {
+    margin: 0;
+    color: inherit;
 }
 
-/* Main marketing message and sign up button */
-.jumbotron {
-  text-align: center;
-  border-bottom: 1px solid #e5e5e5;
-
-  .btn {
-    font-size: 21px;
-    padding: 14px 24px;
-  }
+.card .card-content span.card-title {
+    line-height: 48px;
 }
 
-/* Supporting marketing content */
-.marketing {
-  margin: 40px 0;
-
-  p + h4 {
-    margin-top: 28px;
-  }
+.card .card-action a {
+    color: #ffab40;
+    margin-right: 16px;
+    transition: color 0.3s ease;
+    text-transform: uppercase;
 }
+
+.card .card-action a:hover {
+    color: #ffd8a6;
+    text-decoration: none;
+}
+
 
 /* Responsive: Portrait tablets and up */
-@media screen and (min-width: 768px) {
-  .container {
-    max-width: 730px;
-  }
 
-  /* Remove the padding we set earlier */
-  .header,
-  .marketing,
-  .footer {
-    padding-left: 0;
-    padding-right: 0;
-  }
-  /* Space out the masthead */
-  .header {
-    margin-bottom: 30px;
-  }
-  /* Remove the bottom border on the jumbotron for visual effect */
-  .jumbotron {
-    border-bottom: 0;
-  }
+@media screen and (min-width: 768px) {
+    .container {
+        max-width: 730px;
+    }
+    /* Remove the padding we set earlier */
+    .header,
+    .marketing,
+    .footer {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    /* Space out the masthead */
+    .header {
+        margin-bottom: 30px;
+    }
+    /* Remove the bottom border on the jumbotron for visual effect */
+    .jumbotron {
+        border-bottom: 0;
+    }
 }

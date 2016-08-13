@@ -8,10 +8,12 @@
  * Controller of the pogobotFrontendApp
  */
 angular.module('pogobotFrontendApp')
-  .controller('AboutCtrl', function () {
-    this.awesomeThings = [
+    .controller('AboutCtrl', ['$rootScope', function ($rootScope) {
+        this.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',
       'Karma'
     ];
-  });
+
+        this.tok = $rootScope.accesstoken;
+  }]);
