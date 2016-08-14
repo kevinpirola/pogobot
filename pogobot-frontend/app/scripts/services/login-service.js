@@ -1,7 +1,7 @@
 'use strict';
 
-const TKNAME = 'POGOBOT-TOKEN';
-const LGTYPE = 'POGOBOT-LOGIN-TYPE';
+var TKNAME = 'POGOBOT-TOKEN';
+var LGTYPE = 'POGOBOT-LOGIN-TYPE';
 
 angular.module('pogobotFrontendApp').factory('Login', ['$cookies', function ($cookies) {
     var self = this;

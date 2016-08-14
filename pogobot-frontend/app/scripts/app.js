@@ -13,7 +13,8 @@ angular
     'ngAnimate',
     'ngCookies',
     'ngResource',
-    'ngRoute'
+    'ngRoute',
+    'toaster'
 ])
     .config(function ($routeProvider) {
         $routeProvider
