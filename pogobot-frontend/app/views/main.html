@@ -43,8 +43,11 @@
             </select>
             <button class="btn btn-primary" ng-click="main.logout()">Logout</button>
         </div>
+        <div class="form-group">
+            <input type="text" class="form-control" ng-model="main.search" placeholder="Filter">
+        </div>
     </form>
     <div class="row">
-        <pokemon ng-repeat="p in main.pkmns | orderBy:main.order:(main.order==='pokemon_id' || main.order==='pokemon_name' ? false : true)" pokemon="p" class="col-md-4"></pokemon>
+        <pokemon ng-repeat="p in main.pkmns | orderBy:main.order:(main.order==='pokemon_id' || main.order==='pokemon_name' ? false : true) | filter:{pokemon_name: main.search}" pokemon="p" class="col-md-4"></pokemon>
     </div>
 </div>
