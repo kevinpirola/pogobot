@@ -1,10 +1,38 @@
-<div class="login-box" ng-show="!main.isAuth">
-    <input type="text" ng-model="main.username">
-    <input type="password" ng-model="main.password">
-    <button ng-click="main.login()">LOGIN</button>
+<div class="page-header">
+    <h1>PogoBot - IV Calculator Tool <small>(beta)</small></h1>
 </div>
-<div ng-show="main.isAuth">
-    <button ng-click="main.getPokemon()">GET POKEMON LIST</button>
+<div class="login-box" ng-show="!main.isAuth">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="inputUser">Username</label>
+            <div class="col-sm-10">
+                <input class="form-control" type="text" ng-model="main.username" id="inputUser" placeholder="Username">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="inputPass">Password</label>
+            <div class="col-sm-10">
+                <input class="form-control" type="password" ng-model="main.password" id="inputPass" placeholder="Password">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox">
+                    <label>
+                        <input ng-model="main.googleLogin" type="checkbox"> Google Login
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="Login" ng-click="main.login()">
+            </div>
+        </div>
+    </form>
+</div>
+<div class="page-body text-center" ng-show="main.isAuth">
+    <button class="btn btn-primary" ng-click="main.getPokemon()">GET POKEMON LIST</button>
     <div class="row">
         <pokemon ng-repeat="p in main.pkmns" pokemon="p" class="col-md-4"></pokemon>
     </div>

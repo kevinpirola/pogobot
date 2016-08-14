@@ -18,7 +18,7 @@ angular.module('pogobotFrontendApp')
         ];
 
         self.isAuth = Login.getToken();
-        self.loginType = 'ptc';
+        self.loginType = Login.getLoginType();
         self.pkmns = [];
 
         self.login = function () {
@@ -27,23 +27,23 @@ angular.module('pogobotFrontendApp')
                     username: self.username,
                     password: self.password
                 },
-                loginType: 'google'
+                loginType: (self.googleLogin) ? 'google' : 'ptc'
             }, {
                 dataType: 'json'
             }).then(function (res) {
                 var token = res.data.token;
                 Login.setToken(token);
                 self.isAuth = token;
-                self.loginType = res.data.loginType || 'google';
-                self.order = res.data.loginType || 'iv';
+                self.loginType = res.data.loginType || (self.googleLogin) ? 'google' : 'ptc';
+                self.order = res.data.order;
             });
         };
 
         self.getPokemon = function () {
             Pokemon.getPkmn({
                 token: self.isAuth,
-                lt: self.loginType,
-                order: self.order
+                lt: self.loginType || 'ptc',
+                order: self.order || 'iv'
             }, function (data) {
                 self.pkmns = data.data;
             });
