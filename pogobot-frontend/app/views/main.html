@@ -32,8 +32,19 @@
     </form>
 </div>
 <div class="page-body text-center" ng-show="main.isAuth">
-    <button class="btn btn-primary" ng-click="main.getPokemon()">GET POKEMON LIST</button>
+    <form class="form-inline">
+        <div class="form-group">
+            <button class="btn btn-primary" ng-click="main.getPokemon()">Get pokemon list</button>
+            <select ng-model="main.order" class="form-control">
+                <option value="cp">Combat Power</option>
+                <option value="pokemon_name">Name</option>
+                <option value="pokemon_id">Number</option>
+                <option value="iv">IV</option>
+            </select>
+            <button class="btn btn-primary" ng-click="main.logout()">Logout</button>
+        </div>
+    </form>
     <div class="row">
-        <pokemon ng-repeat="p in main.pkmns" pokemon="p" class="col-md-4"></pokemon>
+        <pokemon ng-repeat="p in main.pkmns | orderBy:main.order:(main.order==='pokemon_id' || main.order==='pokemon_name' ? false : true)" pokemon="p" class="col-md-4"></pokemon>
     </div>
 </div>

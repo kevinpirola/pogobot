@@ -147,8 +147,8 @@ router.route('/user/:token/:lt/pkmns/order/:order')
             return client.getInventory(0);
         }, (err) => {
             console.log(err);
-            res.status(500).json({
-                message: 'Errored'
+            res.status(401).json({
+                message: 'Invalid Token or generic error'
             });
         }).then((inventory) => {
             var pkmns = [];

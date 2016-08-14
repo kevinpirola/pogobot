@@ -20,6 +20,7 @@ angular.module('pogobotFrontendApp')
         self.isAuth = Login.getToken();
         self.loginType = Login.getLoginType();
         self.pkmns = [];
+        self.order = 'cp';
 
         self.login = function () {
             $http.post('http://kevinpirola.ddns.net:8080/api/login', {
@@ -35,8 +36,17 @@ angular.module('pogobotFrontendApp')
                 Login.setToken(token);
                 self.isAuth = token;
                 self.loginType = res.data.loginType || (self.googleLogin) ? 'google' : 'ptc';
-                self.order = res.data.order;
+                self.order = res.data.order || 'cp';
+            }).catch(function (err) {
+                console.log(err);
+                Login.deleteCookies();
             });
+        };
+
+        self.logout = function () {
+            Login.deleteCookies();
+            self.isAuth = null;
+            self.loginType = null;
         };
 
         self.getPokemon = function () {
