@@ -13,8 +13,10 @@ const endLon = 12.216170;
 const startLat = 45.477233;
 const startLon = 12.205493;
 
-var Q = require('q');
+const Q = require('q');
 
+const $moveManager = require('./src/move_manager.js');
+const $gym = require('./src/gym.js');
 
 /** ORDER METHODS **/
 function alphabetic(a, b) {
@@ -134,32 +136,17 @@ login.login(argv.u, argv.p)
 	client.setPosition(startLat, startLon);
         return client.init();
     }).then(() => {
-		console.log('login successful');
-		var cellIDs = pogobuf.Utils.getCellIDs(/*lat, lon*/ startLat, startLon);
-		return client.getMapObjects(cellIDs, Array(cellIDs.length).fill(0));
-		//return client.getInventory(0);
-	}).then(mapObjects => {
-		// Get all gyms from all returned map cells, then retrieve all of their details in one batch call
-		client.batchStart();
-					
-		mapObjects.map_cells.map(cell => cell.forts)
-		    .reduce((a, b) => a.concat(b))
-		    .filter(fort => fort.type === 0)
-		    .forEach(fort => client.getGymDetails(fort.id, fort.latitude, fort.longitude));
-
-		return client.batchCall();
-	    })
-
-.then(gyms => {
-console.log(gyms);
-/*var data = gyms[0].gym_state.fort_data;
-var lat = data.latitude;
-var lon = data.longitude;
-var id = data.id;
-return client.getGymDetails(id, lat, lon);
-}).then(res => {
-	res.gym_state.memberships.forEach(m => {
-	//	console.log(m);
+		return $gym.getGyms(startLat, startLon, client, pogobuf);
+	}).then(gyms => {
+		console.log(gyms);
+		/*var data = gyms[0].gym_state.fort_data;
+		var lat = data.latitude;
+		var lon = data.longitude;
+		var id = data.id;
+		return client.getGymDetails(id, lat, lon);
+	}).then(res => {
+		res.gym_state.memberships.forEach(m => {
+		//	console.log(m);
 		console.log('-----------------------------------' + pokemonList[m.pokemon_data.pokemon_id].name + ' CP: ' + m.pokemon_data.cp + ' TR: ' + m.trainer_public_profile.name);
 	});
 
@@ -174,72 +161,16 @@ console.log(res);
         });
 },err=>{
 	console.log(err);*/
-	move(startLat, startLon, endLat, endLon, 100, client).then(() => {
-                var cellIDs = pogobuf.Utils.getCellIDs(endLat, endLon);
-                return client.getMapObjects(cellIDs, Array(cellIDs.length).fill(0));
-	}).then(mapObjects => {
-                // Get all gyms from all returned map cells, then retrieve all of their details in one batch call
-                client.batchStart();
-
-                mapObjects.map_cells.map(cell => cell.forts)
-                    .reduce((a, b) => a.concat(b))
-                    .filter(fort => fort.type === 0)
-                    .forEach(fort => client.getGymDetails(fort.id, fort.latitude, fort.longitude));
-
-                return client.batchCall();
-        }).then(gyms => {
-		console.log(gyms);
-	});
-});
-
-const TIMEOUT = 1000; //milliseconds
-
-function getSteps(distanceM, speedKmh){
-	return Math.floor(((distanceM * 18) / (speedKmh * 5)) / (TIMEOUT / 1000));
-}
-
-//Thanks to b-h- from StackOverflow	
-function measure(lat1, lon1, lat2, lon2){  // generally used geo measurement function
-    var R = 6378.137; // Radius of earth in KM
-    var dLat = (lat2 - lat1) * Math.PI / 180;
-    var dLon = (lon2 - lon1) * Math.PI / 180;
-    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    var d = R * c;
-    return d * 1000; // meters
-}
-
-function move(startLat, startLon, endLat, endLon, speed, client){
-	var deferred = Q.defer();
 	
-	var distance = measure(startLat, startLon, endLat, endLon);
-	var steps = getSteps(distance, speed);
-	
-	var dLat = (endLat - startLat) / steps;
-	var dLon = (endLon - startLon) / steps;
 
-	move_rec(startLat, startLon, dLat, dLon, steps, deferred);
-
-	return deferred.promise.then(() => {
-		client.setPosition(endLat, endLon);
-		return client.playerUpdate();
+        return $moveManager.move(startLat, startLon, endLat, endLon, 100, client, Q)
+    }).then(() => {
+        return $gym.getGyms(endLat, endLon, client, pogobuf);
+    }).then(gyms => {
+        console.log(gyms);
 	});
-}
 
-function move_rec(x, y, dx, dy, steps, deferred){
-	console.log('Steps to move: ' + steps);
-	if(steps <= 0){
-		deferred.resolve(undefined);
-	} else {
-		x += dx;
-		y += dy;
-		client.setPosition(x, y);
-		client.playerUpdate();
-		setTimeout(function(){ move_rec(x, y, dx, dy, steps - 1, deferred); }, TIMEOUT);
-	}
-}
+
         // Make some API calls!
         /*return client.getInventory(0);
     }, (err) => {
