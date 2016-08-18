@@ -190,6 +190,82 @@ router.route('/user/:token/:lt/pkmns/order/:order')
         });
     });
 
+/**************** GYM *****************/
+
+var gyms = {};
+var gymsPath = [{lat: 45.477233, lon: 12.205493}, {lat: 45.476693, lon: 12.216170}];
+var gymsPathStep = 0;
+const $move = require('./src/move_manager.js');
+const $gym = require('./src/gym.js');
+var gymsClient;
+var speed = 100;
+
+router.route('/gym')
+	.get((req, res) => {
+		res.status(200).json({data: filterGyms()});
+	});
+
+router.route('/gym/:id')
+	.get((req, res) => {
+		//console.log(req.params.id);
+		res.status(200).json({data: {custom: 'TODO'}});
+	});
+
+function filterGyms(){
+	var result = [];
+	
+	for(i in gyms){
+		var gym = gyms[i];
+		var obj = {};
+		obj.id = gym.gym_state.fort_data.id;
+		obj.name = gym.name;
+		obj.points = gym.gym_state.fort_data.gym_points;
+		obj.is_in_battle = gym.gym_state.fort_data.is_in_battle;
+		obj.team = gym.gym_state.fort_data.owned_by_team;
+		obj.lat = gym.gym_state.fort_data.latitude;
+		obj.lon = gym.gym_state.fort_data.longitude;
+		result.push(obj);
+	}
+
+	return result;
+}
+
+function startGymsDaemon(){
+    	initClient().then(() => {
+		gyms_loop();
+	});
+}
+
+function initClient(){
+	var login = new pogobuf.GoogleLogin();
+        gymsClient = new pogobuf.Client();
+        return login.login('username', 'password')
+        	.then(token => {
+                	gymsClient.setAuthInfo('google', token);
+                	gymsClient.setPosition(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon);
+                	return gymsClient.init();
+        	});
+}
+
+function gyms_loop(){
+	$gym.getGyms(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon, gymsClient, pogobuf).then((loopGyms) => {
+		loopGyms.forEach(function(gym){
+			gyms[gym.gym_state.fort_data.id] = gym;	
+		});
+		
+		var newGymsPathStep = (gymsPathStep + 1) % gymsPath.length;
+		var promise = $move.move(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon, gymsPath[newGymsPathStep].lat, gymsPath[newGymsPathStep].lon, speed, gymsClient);
+		gymsPathStep = newGymsPathStep;	
+		return promise;
+	}).then(() => {
+		gyms_loop();
+	});	
+}
+
+startGymsDaemon();
+
+/****************END GYM ****************/
+
 app.use('/api', router);
 
 var rl = readline.createInterface({

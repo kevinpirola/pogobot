@@ -13,11 +13,6 @@ const endLon = 12.216170;
 const startLat = 45.477233;
 const startLon = 12.205493;
 
-const Q = require('q');
-
-const $moveManager = require('./src/move_manager.js');
-const $gym = require('./src/gym.js');
-
 /** ORDER METHODS **/
 function alphabetic(a, b) {
     var na = pokemonList[a.pokemon_id].name;
@@ -126,6 +121,9 @@ if (argv.l) {
 }
 var pkmns = [];
 
+const $moveManager = require('./src/move_manager.js');
+const $gym = require('./src/gym.js');
+
 var client = new pogobuf.Client();
 login.login(argv.u, argv.p)
     .then(token => {
@@ -163,7 +161,7 @@ console.log(res);
 	console.log(err);*/
 	
 
-        return $moveManager.move(startLat, startLon, endLat, endLon, 100, client, Q)
+        return $moveManager.move(startLat, startLon, endLat, endLon, 100, client)
     }).then(() => {
         return $gym.getGyms(endLat, endLon, client, pogobuf);
     }).then(gyms => {
