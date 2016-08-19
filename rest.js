@@ -193,7 +193,8 @@ router.route('/user/:token/:lt/pkmns/order/:order')
 /**************** GYM *****************/
 
 var gyms = {};
-var gymsPath = [{lat: 45.477233, lon: 12.205493}, {lat: 45.476693, lon: 12.216170}];
+var $jsonfile = require('jsonfile');
+var gymsPath = $jsonfile.readFileSync('./res/path.json');
 var gymsPathStep = 0;
 const $move = require('./src/move_manager.js');
 const $gym = require('./src/gym.js');
@@ -207,8 +208,7 @@ router.route('/gym')
 
 router.route('/gym/:id')
 	.get((req, res) => {
-		//console.log(req.params.id);
-		res.status(200).json({data: {custom: 'TODO'}});
+		res.status(200).json({data: gyms[req.params.id]});
 	});
 
 function filterGyms(){
@@ -224,6 +224,7 @@ function filterGyms(){
 		obj.team = gym.gym_state.fort_data.owned_by_team;
 		obj.lat = gym.gym_state.fort_data.latitude;
 		obj.lon = gym.gym_state.fort_data.longitude;
+		obj.visit_timestamp = gym.visit_timestamp;
 		result.push(obj);
 	}
 
@@ -249,9 +250,15 @@ function initClient(){
 
 function gyms_loop(){
 	$gym.getGyms(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon, gymsClient, pogobuf).then((loopGyms) => {
-		loopGyms.forEach(function(gym){
-			gyms[gym.gym_state.fort_data.id] = gym;	
-		});
+		if(Array.isArray(loopGyms)){
+			loopGyms.forEach(function(gym){
+				gym.visit_timestamp = new Date().getTime();
+				gyms[gym.gym_state.fort_data.id] = gym;	
+			});
+		} else {
+			loopGyms.visit_timestamp = new Date().getTime();
+			gyms[loopGyms.gym_state.fort_data.id] = loopGyms;
+		}
 		
 		var newGymsPathStep = (gymsPathStep + 1) % gymsPath.length;
 		var promise = $move.move(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon, gymsPath[newGymsPathStep].lat, gymsPath[newGymsPathStep].lon, speed, gymsClient);
