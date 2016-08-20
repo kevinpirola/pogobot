@@ -6,7 +6,7 @@ angular.module('pogobotFrontendApp')
         controller: ['$mdSidenav', function ($mdSidenav) {
             var self = this;
             self.toggleSidenav = function () {
-                $mdSidenav('sidenav-left').toggle();
+                $mdSidenav('sidenav-left').open();
             };
         }]
     });

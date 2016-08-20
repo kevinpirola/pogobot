@@ -27,6 +27,14 @@ angular
                 templateUrl: 'views/main.html',
                 controller: 'MainCtrl',
                 controllerAs: 'main'
+            })
+            .state('gyms', {
+                url: '/gyms',
+                templateUrl: 'views/gyms.html'
+            })
+            .state('about', {
+                url: '/about',
+                templateUrl: 'views/about.html'
             });
 
 }])

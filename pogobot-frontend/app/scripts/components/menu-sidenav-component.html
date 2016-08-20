@@ -1,0 +1,24 @@
+<md-sidenav md-component-id="sidenav-left" class="md-sidenav-left">
+    <md-toolbar class="md-theme-indigo">
+        <div class="md-toolbar-tools">
+            <h1>Navigation Menu</h1>
+            <span flex></span>
+            <md-button class="md-icon-button" aria-label="More" ng-click="$ctrl.closeSidenav()">
+                <md-icon md-svg-icon="close"></md-icon>
+            </md-button>
+        </div>
+        <md-content>
+            <ul>
+                <li>
+                    <a class="md-button md-ink-ripple menu" ui-sref="home" ng-click="$ctrl.closeSidenav()"><i class="fa fa-percent"></i>IV Calculator</a>
+                </li>
+                <li>
+                    <a class="md-button md-ink-ripple menu" ui-sref="gyms" ng-click="$ctrl.closeSidenav()"><i class="fa fa-trophy"></i>Gyms Controller</a>
+                </li>
+                <li>
+                    <a class="md-button md-ink-ripple menu" ui-sref="about" ng-click="$ctrl.closeSidenav()"><i class="fa fa-copyright"></i>About</a>
+                </li>
+            </ul>
+        </md-content>
+    </md-toolbar>
+</md-sidenav>
