@@ -14,9 +14,26 @@ angular
     'ngCookies',
     'ngResource',
     'ngRoute',
-    'toaster'
+    'toaster',
+    'ui.router',
+    'ngMaterial'
 ])
-    .config(function ($routeProvider) {
+    .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+        $urlRouterProvider.otherwise('/');
+
+        $stateProvider
+            .state('home', {
+                url: '/',
+                templateUrl: 'views/main.html',
+                controller: 'MainCtrl',
+                controllerAs: 'main'
+            });
+
+}])
+    .config(['$mdIconProvider', function ($mdIconProvider) {
+        $mdIconProvider.defaultIconSet('images/mdi.svg');
+    }])
+    /*.config(function ($routeProvider) {
         $routeProvider
             .when('/', {
                 templateUrl: 'views/main.html',
@@ -49,7 +66,7 @@ angular
             .otherwise({
                 redirectTo: '/'
             });
-    })
+    })*/
     .config(['$httpProvider', function ($httpProvider) {
         //Http Intercpetor to check auth failures for xhr requests
         $httpProvider.interceptors.push('authHttpResponseInterceptor');
