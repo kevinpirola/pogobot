@@ -30,7 +30,9 @@ angular
             })
             .state('gyms', {
                 url: '/gyms',
-                templateUrl: 'views/gyms.html'
+                templateUrl: 'views/gyms.html',
+                controller: 'GymsCtrl',
+                controllerAs: '$ctrl'
             })
             .state('about', {
                 url: '/about',

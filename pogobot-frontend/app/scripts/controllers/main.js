@@ -11,11 +11,6 @@ angular.module('pogobotFrontendApp')
     .controller('MainCtrl', ['$window', '$http', 'Login', 'Pokemon', function ($window, $http, Login, Pokemon) {
 
         var self = this;
-        this.awesomeThings = [
-          'HTML5 Boilerplate',
-          'AngularJS',
-          'Karma'
-        ];
 
         self.isAuth = Login.getToken();
         self.loginType = Login.getLoginType();

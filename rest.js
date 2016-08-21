@@ -132,7 +132,7 @@ router.route('/login')
                 token: us.getToken()
             });
         }, (err) => {
-            console.log(err);
+            console.log('[PogoBuf] - ' + err);
             res.status(401).json({
                 message: 'Unable to login'
             });
@@ -146,7 +146,7 @@ router.route('/user/:token/:lt/pkmns/order/:order')
         client.init().then(() => {
             return client.getInventory(0);
         }, (err) => {
-            console.log(err);
+            console.log('[PogoBuf] - ' + err);
             res.status(401).json({
                 message: 'Invalid Token or generic error'
             });
@@ -202,71 +202,82 @@ var gymsClient;
 var speed = 100;
 
 router.route('/gym')
-	.get((req, res) => {
-		res.status(200).json({data: filterGyms()});
-	});
+    .get((req, res) => {
+        res.status(200).json({
+            data: filterGyms()
+        });
+    });
 
 router.route('/gym/:id')
-	.get((req, res) => {
-		res.status(200).json({data: gyms[req.params.id]});
-	});
+    .get((req, res) => {
+        res.status(200).json({
+            data: gyms[req.params.id]
+        });
+    });
 
-function filterGyms(){
-	var result = [];
-	
-	for(i in gyms){
-		var gym = gyms[i];
-		var obj = {};
-		obj.id = gym.gym_state.fort_data.id;
-		obj.name = gym.name;
-		obj.points = gym.gym_state.fort_data.gym_points;
-		obj.is_in_battle = gym.gym_state.fort_data.is_in_battle;
-		obj.team = gym.gym_state.fort_data.owned_by_team;
-		obj.lat = gym.gym_state.fort_data.latitude;
-		obj.lon = gym.gym_state.fort_data.longitude;
-		obj.visit_timestamp = gym.visit_timestamp;
-		result.push(obj);
-	}
+function filterGyms() {
+    var result = [];
 
-	return result;
+    for (i in gyms) {
+        var gym = gyms[i];
+        var obj = {};
+        obj.id = gym.gym_state.fort_data.id;
+        obj.name = gym.name;
+        obj.points = gym.gym_state.fort_data.gym_points;
+        obj.is_in_battle = gym.gym_state.fort_data.is_in_battle;
+        obj.team = gym.gym_state.fort_data.owned_by_team;
+        obj.lat = gym.gym_state.fort_data.latitude;
+        obj.lon = gym.gym_state.fort_data.longitude;
+        obj.visit_timestamp = gym.visit_timestamp;
+        result.push(obj);
+    }
+
+    return result;
 }
 
-function startGymsDaemon(){
-    	initClient().then(() => {
-		gyms_loop();
-	});
+function startGymsDaemon() {
+    initClient().then(() => {
+        gyms_loop();
+    }, (err) => {
+        console.log('[PogoBuf].[GymsDaemon] - Error in initialization: ' + err);
+    });
 }
 
-function initClient(){
-	var login = new pogobuf.GoogleLogin();
-        gymsClient = new pogobuf.Client();
-        return login.login('username', 'password')
-        	.then(token => {
-                	gymsClient.setAuthInfo('google', token);
-                	gymsClient.setPosition(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon);
-                	return gymsClient.init();
-        	});
+function initClient() {
+    var login = new pogobuf.PTCLogin();
+    gymsClient = new pogobuf.Client();
+
+    return login.login('username925363', 'password')
+        .then(token => {
+            console.log('[PogoBuf].[GymsDaemon] - Login Successful');
+            gymsClient.setAuthInfo('ptc', token);
+            gymsClient.setPosition(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon);
+            return gymsClient.init();
+        }, (err) => {
+            console.log('[PogoBuf].[GymsDaemon] - Error while login: ' + err);
+        });
 }
 
-function gyms_loop(){
-	$gym.getGyms(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon, gymsClient, pogobuf).then((loopGyms) => {
-		if(Array.isArray(loopGyms)){
-			loopGyms.forEach(function(gym){
-				gym.visit_timestamp = new Date().getTime();
-				gyms[gym.gym_state.fort_data.id] = gym;	
-			});
-		} else {
-			loopGyms.visit_timestamp = new Date().getTime();
-			gyms[loopGyms.gym_state.fort_data.id] = loopGyms;
-		}
-		
-		var newGymsPathStep = (gymsPathStep + 1) % gymsPath.length;
-		var promise = $move.move(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon, gymsPath[newGymsPathStep].lat, gymsPath[newGymsPathStep].lon, speed, gymsClient);
-		gymsPathStep = newGymsPathStep;	
-		return promise;
-	}).then(() => {
-		gyms_loop();
-	});	
+function gyms_loop() {
+    console.log('[PogoBuf].[GymsDaemon] - Looping...');
+    $gym.getGyms(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon, gymsClient, pogobuf).then((loopGyms) => {
+        if (Array.isArray(loopGyms)) {
+            loopGyms.forEach(function (gym) {
+                gym.visit_timestamp = new Date().getTime();
+                gyms[gym.gym_state.fort_data.id] = gym;
+            });
+        } else {
+            loopGyms.visit_timestamp = new Date().getTime();
+            gyms[loopGyms.gym_state.fort_data.id] = loopGyms;
+        }
+
+        var newGymsPathStep = (gymsPathStep + 1) % gymsPath.length;
+        var promise = $move.move(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon, gymsPath[newGymsPathStep].lat, gymsPath[newGymsPathStep].lon, speed, gymsClient);
+        gymsPathStep = newGymsPathStep;
+        return promise;
+    }).then(() => {
+        gyms_loop();
+    });
 }
 
 startGymsDaemon();
