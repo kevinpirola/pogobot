@@ -57,7 +57,7 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/boots
     border-radius: 2px 2px 0 0;
     background-clip: padding-box;
     position: relative;
-    z-index: -1;
+    z-index: 10;
 }
 
 .card .card-image span.card-title {
@@ -137,6 +137,29 @@ menu-sidenav {
     p {
         text-align: justify;
     }
+}
+
+.gym-details {
+    padding: 10px;
+    .gym-pic {
+        margin: auto;
+        width: 150px;
+        height: 150px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 50%;
+        border: 5px solid rgb(40, 53, 147);
+        img {
+            display: inline;
+            margin: 0 auto;
+            height: 100%;
+            width: auto;
+        }
+    }
+}
+
+md-card[md-ink-ripple] {
+    position: relative;
 }
 
 // ############################################ //

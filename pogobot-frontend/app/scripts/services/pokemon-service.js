@@ -6,11 +6,10 @@ angular.module('pogobotFrontendApp').factory('Pokemon', ['$resource', function (
     }, {
         getPkmn: {
             method: 'GET',
-            url: 'http://kevinpirola.ddns.net:8080/api/user/:token/:lt/pkmns/order/:order',
+            url: 'http://kevinpirola.ddns.net:8080/api/user/:token/:lt/pkmns',
             params: {
                 token: '@token',
-                lt: '@lt',
-                order: '@order'
+                lt: '@lt'
             }
         }
     });

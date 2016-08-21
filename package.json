@@ -29,7 +29,7 @@
     "long": "^3.2.0",
     "minimist": "^1.2.0",
     "node-pogo-protos": "^1.3.0",
-    "pogobuf": "^1.5.3",
+    "pogobuf": "^1.6.0",
     "q": "^1.4.1",
     "readline": "^1.3.0",
     "s2-geometry": "^1.2.8"

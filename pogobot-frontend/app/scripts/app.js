@@ -34,6 +34,12 @@ angular
                 controller: 'GymsCtrl',
                 controllerAs: '$ctrl'
             })
+            .state('details', {
+                url: '/gyms/:id',
+                templateUrl: 'views/gym-details.html',
+                controller: 'GymDetailCtrl',
+                controllerAs: '$ctrl'
+            })
             .state('about', {
                 url: '/about',
                 templateUrl: 'views/about.html'

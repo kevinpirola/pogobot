@@ -5,14 +5,16 @@
  * @since 09/08/2016
  *
  */
-var express = require('express'); // call express
-var app = express();
+var express = require('express');
 var bodyParser = require('body-parser');
 var readline = require('readline');
-
-////////////////////
 const pogobuf = require('pogobuf');
 const pokemonList = require('./data/pokemon.json');
+
+var app = express();
+
+
+////////// USER //////////
 
 function User(u, p) {
     this.username = u;
@@ -49,9 +51,10 @@ User.prototype.getToken = function () {
     return this.token;
 }
 
-/////////////
+//////////////////////////
 
 /** ORDER METHODS **/
+/*
 function alphabetic(a, b) {
     var na = pokemonList[a.pokemon_id].name;
     var nb = pokemonList[b.pokemon_id].name;
@@ -80,7 +83,7 @@ function number(a, b) {
     if (a.pokemon_id > b.pokemon_id) return 1;
     return 0;
 }
-
+*/
 ////////////////
 
 var us;
@@ -139,7 +142,7 @@ router.route('/login')
         })
     });
 
-router.route('/user/:token/:lt/pkmns/order/:order')
+router.route('/user/:token/:lt/pkmns')
     .get((req, res) => {
         var client = new pogobuf.Client();
         client.setAuthInfo(req.params.lt, req.params.token);
@@ -165,22 +168,22 @@ router.route('/user/:token/:lt/pkmns/order/:order')
                     pkmns.push(data);
                 }
             });
+            /*
+                        var o = req.params.order;
+                        var order = iv;
+                        if (o) {
+                            if (o === 'ab' || o === 'alphabetic' || o === 'name') {
+                                order = alphabetic;
+                            } else if (o === 'cp') {
+                                order = cp;
+                            } else if (o === 'iv' || o === 'IV') {
+                                order = iv;
+                            } else if (o === 'n' || o === 'number') {
+                                order = number;
+                            }
+                        }
 
-            var o = req.params.order;
-            var order = iv;
-            if (o) {
-                if (o === 'ab' || o === 'alphabetic' || o === 'name') {
-                    order = alphabetic;
-                } else if (o === 'cp') {
-                    order = cp;
-                } else if (o === 'iv' || o === 'IV') {
-                    order = iv;
-                } else if (o === 'n' || o === 'number') {
-                    order = number;
-                }
-            }
-
-            pkmns.sort(order);
+                        pkmns.sort(order);*/
             res.status(200).json({
                 message: 'List retreived successfully',
                 data: pkmns
