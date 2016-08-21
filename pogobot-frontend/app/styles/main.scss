@@ -122,14 +122,20 @@ menu-sidenav {
                             text-decoration: none;
                             text-align: left;
                             margin: 0;
-                            i{
-                                margin-right:15px;
+                            i {
+                                margin-right: 15px;
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+.about {
+    p {
+        text-align: justify;
     }
 }
 

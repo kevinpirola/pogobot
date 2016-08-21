@@ -1,6 +1,6 @@
 'use strict';
 
 angular.module('pogobotFrontendApp')
-    .factory('Gym', ['$resource', function ($resource) {
-        return $resource('http://localhost:8080/api/gym');
+    .factory('Gym', ['$resource', '$location', function ($resource, $location) {
+        return $resource($location.protocol() + '://' + $location.host() + ':8080/api/gym');
     }]);

@@ -1,10 +1,10 @@
 = PogoBot
 
-WARNING: This is likely to be not legal for Niantic and might led your account to a ban. Use at your own risk. The team can't be responsible for your loss. Doing anything of the following guide state that you agree with this. Every information (username or password) will not be stored anywhere in our systems.
+NOTE: Using third party application is against the term of service of Niantic's Pokemon GO game. This entire project is created only for educational purpose and it depends on others' works to fetch data from the game. There is the possibility that those project change or will be closed. We are not developing them and we are not responsible fot that.
 
 == Introduction
 I am a pokémon fan, I am a Pokémon Go player, I am a software developer, I am an open source fan.
-The aim of this project is to create something that can be used by Pokémon Go player in order to improve their game experience.
+The aim of this project is to create something that can (but should not) be used by Pokémon Go player in order to improve their game experience.
 Of course the final goal is to be the definitive Bot, in a first moment it will be just a bunch of useful tools.
 
 === Why a bot
@@ -24,28 +24,48 @@ Please, remember, if you use a bot that is unfair. Someone on his bike on top of
 
 That is one of the worst feeling, and of course will earn you a direct report to Niantic.
 
-Don't be smartass. Play fair, or instead play LOL, there you can Bot as much as you can, as I don't play.
+Don't be smartass. Play fair, or instead play LOL, there you can Bot as much as you can, as I don't play it.
 
 === For the sake of "I CAN"
-I will never be done in saying that this project is *not* created just to allow strangers to cheat at the game.
-I am developing this just because I think I can. And for me it's enough. There will be instruction, detailed wiki and so on. But I will never help anybody. If you want to cheat you should have enough knowledge to cheat.
+I will never be done in saying that this project is *not* created just to allow strangers to cheat at the game, and it is created for educational purpose.
+*I am developing this just because I think I can*. And for me it's enough. There will be instruction, maybe detailed wiki and so on. But I will never help anybody. If you want to cheat you should have enough knowledge to cheat. Or you don't deserve to be a cheater.
 
 == The team
-At the moment the team is composed by myself, but I'm working side by side with my friend Alberto. I hope his back pain will relieve soon so that he will be able to help me.
+At the moment the team is composed by myself and my friend Alberto. I admire him for it is developing fighting against a strong backache.
 
 == Technologies
 Here there will be listed all the technologies used to create the bot.
 
+The backend is created entirely in javascript, and is runned on NodeJS.
+The frontend is developed with AngularJS 1.5, using grunt and bower to manage dependency and project workflow.
+
 == Features
 === IV calculator
+
+WARNING: This is likely to be not legal for Niantic and because it uses your account to fetch the data needed it might led to a ban. *Use at your own risk*. The team can't be responsible for your loss. Doing anything of the following guide state that you agree with this. Every information (username or password) will not be stored anywhere in our systems. The team is using che calculator itself, no ban are yet been given to our accounts.
+
 The IV calculator is a tool that can read the list of all your pokemon from your account and return a single precise IV value for each of them. The tool features will be:
 
- * Fetch the list of pokemons from an account (PTC and Google)
- * Calculate the IV (attack, defense and stamina) for each pokemon
- * Store the data in the DB for offline browsing
- * Order the result by id, name, CP or IV
- * ......more to come......
+ [x] Fetch the list of pokemons from an account (PTC and Google)
+ [x] Calculate the IV (attack, defense and stamina) for each pokemon
+ [ ] Store the data in the DB for offline browsing
+ [x] Order the result by id, name, CP or IV
 
+=== Gym Controller
+
+This feature is *100%* safe to be used, because it uses a dummy account that is in no way related to your main account.
+
+The Gym Controller is a tool that allows you to keep track of the gyms in a city, you will receive different informations for each Gym that you can use to improve your 'Gym Taking' and 'Gym Leading'.
+
+ [X] Walk around in a chosen loop
+ [X] Fetch Gyms simple data (team, points and level)
+ [ ] Fetch Gym Leader data (pokemon, nickname, level)
+ [ ] Fetch all pokemon data (CP, IV and attacks)
+ [ ] Fetch real time data (is in combat, is being trained or beated)
+ [ ] Keep white (BOT)
+ [ ] Keep chosen color (BOT)
+ [ ] Automatic Train (BOT)
+ 
 == Installation and run
 To run the application on your laptop there are a variety of pre-requisite that you need to fulfill.
 
@@ -102,12 +122,31 @@ The project is changing hours by ours, to keep your code up-to-date just run:
 git pull origin master
 ----
 
-In future I will add different branches and tagged releases.
+At the moment there are two main branches, master where you can find the current release and develop that is the branch we use to pre-release code.
 
 === Installing the dependencies
 When you have cloned the repository navigate to the root folder (for example `cd ~/Documents/pogobot/`) and run:
 ----
 npm install
+----
+
+To run the frontend you will need grunt:
+----
+npm install -g grunt-cli
+----
+and bower
+----
+npm install -g bower
+----
+
+To run a server to test the code just run:
+----
+grunt serve
+----
+
+to build the app:
+----
+grunt build
 ----
 
 === Run
@@ -121,3 +160,8 @@ You can also use various dependencies like:
  * `-o` to specify how you want the list of pokemon to be ordered (ab: alphabetically, IV: by IV, cp: by CP, name)
 
 To save the output in a file just add `> filename.txt` to the command.
+
+To run the server (IV calculator and Gym Controller) you will have to run:
+----
+node rest.js
+----
