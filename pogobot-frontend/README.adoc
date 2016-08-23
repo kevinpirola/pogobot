@@ -1,0 +1,118 @@
+= Web Application - PogoBot
+
+This module of the project is created to group together various useful tools.
+The aim of the project is purely academic and is developed to study the dynamics of the game.
+
+== IV Calculator
+
+This module ask the server (using your account) the data about your pokémons, the app then show them to you in a grid. Each pokémon will be presented with its attack, defense and stamina, the server then calculate for you the IV percent. Each card will contain an animated Gif of the pokemon.
+
+You can order the list by number, name, IV or Combat Power.
+
+== Gym Controller
+
+This module is used to have a general view of a number of gyms in a predetermined area. It uses a dummy player that walks around a chosen path and fetch data of the gyms it encounter (or are nearby).
+The gyms are then listed in a page telling what team is the owner, few data such as name and description, the image, points and level.
+
+Next version vill feature the data about the pokemons inside, which ones, what stats it has (attack, defense and stamina), its IV and CP and also what moves it has.
+
+== Installation
+
+This project is generated with [yo angular generator](https://github.com/yeoman/generator-angular)
+version 0.14.0. And feature Grunt, Bower, Npm, Karma and Jasmine.
+
+To set up the environment you need to fulfill few requirements.
+
+=== NodeJS
+
+One above the other is NodeJS that is the 'deus ex machina' of the project that is used with its package manager to manage the project.
+
+To install NodeJS (on ubuntu) you have to run:
+----
+sudo apt-get install nodejs
+----
+
+and to install NPM run:
+----
+sudo apt-get install npm
+----
+
+then verify that node is installed running:
+----
+node -v && npm -v
+----
+
+that should return something like:
+----
+v4.4.7
+2.15.8
+----
+
+Once you have node up and running you can proceed with the next step.
+
+=== Grunt and Bower
+
+Two other tools used are Grunt and Bower, that you can install using npm.
+
+----
+sudo npm install -g bower grunt-cli
+----
+
+The -g option is used to install them globally.
+
+Verify the correct installation running
+----
+grunt --version && bower -v
+----
+
+that should return something like:
+----
+grunt-cli v0.1.13
+1.7.9
+----
+
+=== CSS and the magic of Sass
+
+Another tool used in the project is the pre-processor sass. In order to have it working you will need to install the compiler and few other magic dust.
+
+Sass will run side by side with compass, both on top of ruby.
+
+You will need to install ruby running
+----
+sudo apt-get install ruby-full
+----
+
+and then install sass and compass
+----
+sudo gem install sass
+sudo gem install compass
+----
+
+We noticed that in some systems you will need to install also python.
+
+=== Install the dependencies
+
+To install the dependencies run 
+----
+npm install && bower install
+----
+
+This may take a while but, once finished, will create two folder: 'node_modules' and 'bower_components' filled with the needed files of dependencies.
+
+=== Run a server
+
+Grunt is powerful and allows you to run a quick server that will handle your files.
+
+----
+grunt serve
+----
+
+=== Build a distribution
+
+If you want you can create a distribution version of the webapp, that will be compressed, minified and uglyfied, you can run:
+
+----
+grunt build
+----
+
+that will create a dist/ folder sister of the app/ folder. You will be able then to run them in a server.

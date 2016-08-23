@@ -1,3 +1,5 @@
+#!/usr/local/bin/node
+
 /**
  * This class is used to run a set of RESTful API
  *
