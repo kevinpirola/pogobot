@@ -8,7 +8,7 @@
  * Controller of the pogobotFrontendApp
  */
 angular.module('pogobotFrontendApp')
-    .controller('MainCtrl', ['$window', '$http', 'Login', 'Pokemon', function ($window, $http, Login, Pokemon) {
+    .controller('MainCtrl', ['$window', '$http', 'Login', 'Pokemon', '$location', function ($window, $http, Login, Pokemon, $location) {
 
         var self = this;
 
@@ -18,7 +18,7 @@ angular.module('pogobotFrontendApp')
         self.order = 'cp';
 
         self.login = function () {
-            $http.post('http://kevinpirola.ddns.net:8080/api/login', {
+            $http.post($location.protocol() + '://' + $location.host() + ':8080/api/login', {
                 user: {
                     username: self.username,
                     password: self.password
