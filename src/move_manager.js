@@ -2,6 +2,9 @@ const Q = require('q');
 
 const MOVE_TIMEOUT = 1000;
 
+var status = true;
+var error = undefined;
+
 function getSteps(distanceM, speedKmh){
 	return Math.floor(((distanceM * 18) / (speedKmh * 5)) / (MOVE_TIMEOUT / 1000));
 }
@@ -22,12 +25,20 @@ function measure(lat1, lon1, lat2, lon2){  //generally used geo measurement func
 function move_rec(x, y, dx, dy, steps, deferred, client){
         console.log('Steps to move: ' + steps);
         if(steps <= 0){
-            deferred.resolve(undefined);
+            if(status){
+                deferred.resolve(undefined);
+            } else {
+                status = true;
+                deferred.reject(error);
+            }
         } else {
             x += dx;
             y += dy;
             client.setPosition(x, y);
-            client.playerUpdate();
+            client.playerUpdate().catch((err) => { 
+                status = false;
+                error = err;
+            });
             setTimeout(function(){ move_rec(x, y, dx, dy, steps - 1, deferred, client); }, MOVE_TIMEOUT);
         }
 }

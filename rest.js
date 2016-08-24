@@ -254,7 +254,7 @@ function initClient() {
 
     return login.login('username925363', 'password')
         .then(token => {
-            console.log('[PogoBuf].[GymsDaemon] - Login Successful');
+            console.log('[PogoBuf].[GymsDaemon] - Login Successful ' + token);
             gymsClient.setAuthInfo('ptc', token);
             gymsClient.setPosition(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon);
             return gymsClient.init();
@@ -282,6 +282,9 @@ function gyms_loop() {
         return promise;
     }).then(() => {
         gyms_loop();
+    }).catch((ecc) => {
+	console.log("[PogoBuf].[GymsDaemon] - Token not valid, reinitializing daemon");
+	startGymsDaemon();
     });
 }
 
