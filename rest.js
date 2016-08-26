@@ -12,9 +12,10 @@ var bodyParser = require('body-parser');
 var readline = require('readline');
 const pogobuf = require('pogobuf');
 const pokemonList = require('./data/pokemon.json');
+const sqlite = require('sqlite3').verbose();
+const db = new sqlite.Database('pogobot.db');
 
 var app = express();
-
 
 ////////// USER //////////
 
@@ -55,38 +56,80 @@ User.prototype.getToken = function () {
 
 //////////////////////////
 
-/** ORDER METHODS **/
-/*
-function alphabetic(a, b) {
-    var na = pokemonList[a.pokemon_id].name;
-    var nb = pokemonList[b.pokemon_id].name;
-    if (na < nb) return -1;
-    if (na > nb) return 1;
-    return 0;
+//////// DATABASE ////////
+
+function insertGymIfNew(gym) {
+    db.get('SELECT * FROM GYMS WHERE G_ID = $id LIMIT 1', {
+        $id: gym.gym_state.fort_data.id
+    }, function (err, row) {
+        if (!row) {
+            console.log('[PogoBot].[Database] - Added a new gym to the list');
+            db.run('INSERT INTO GYMS (G_ID, G_LAT, G_LON, G_NAME, G_IMG) VALUES ($id, $lat, $lon, $name, $img)', {
+                $id: gym.gym_state.fort_data.id,
+                $lat: gym.gym_state.fort_data.latitude,
+                $lon: gym.gym_state.fort_data.longitude,
+                $name: gym.name,
+                $img: gym.urls[0]
+            });
+        }
+    });
 }
 
-function cp(a, b) {
-    if (a.cp > b.cp) return -1;
-    if (a.cp < b.cp) return 1;
-    return 0;
+function insertNewDataUpdate(gym) {
+    db.run('INSERT INTO GYM_DATA (GD_ID_GYM, GD_TIMESTAMP, GD_POINTS, GD_LEVEL, GD_OWNER_TEAM, GD_IS_IN_BATTLE) VALUES ($id, $time, $points, (SELECT L_ID FROM LEVELS WHERE $points >= L_MIN_POINTS ORDER BY L_MIN_POINTS DESC LIMIT 1), $owner, $inbattle)', {
+        $id: gym.gym_state.fort_data.id,
+        $time: new Date().getTime(),
+        $points: gym.gym_state.fort_data.gym_points,
+        $owner: gym.gym_state.fort_data.owned_by_team,
+        $inbattle: gym.gym_state.fort_data.is_in_battle
+    });
 }
 
-function iv(a, b) {
-    var tota = a.individual_attack + a.individual_defense + a.individual_stamina;
-    var totb = b.individual_attack + b.individual_defense + b.individual_stamina;
-
-    if (tota > totb) return -1;
-    if (tota < totb) return 1;
-    return 0;
+function storeGymAndData(gym) {
+    db.serialize(function () {
+        insertGymIfNew(gym);
+        insertNewDataUpdate(gym);
+    });
 }
 
-function number(a, b) {
-    if (a.pokemon_id < b.pokemon_id) return -1;
-    if (a.pokemon_id > b.pokemon_id) return 1;
-    return 0;
+function getGyms(callback) {
+    db.all(' SELECT * FROM GYMS)', callback);
 }
-*/
-////////////////
+
+function getFatGyms(callback) {
+    db.all('SELECT * FROM GYMS ' +
+        'JOIN GYM_DATA ON G_ID = GD_ID_GYM AND GD_TIMESTAMP = (SELECT MAX(GD_TIMESTAMP) FROM GYM_DATA WHERE GD_ID_GYM = G_ID) ', callback);
+}
+
+function getGym(id, callback) {
+    db.get('SELECT * FROM GYMS WHERE G_ID = $id', {
+        $id: id
+    }, callback);
+}
+
+function getGymData(id, callback) {
+    db.get('SELECT * FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1', {
+        $id: id
+    }, callback);
+}
+
+function isGymGrowing(id, callback) {
+    //'SECOND_LAST AS (SELECT DISTINCT GD_POINTS AS PREVIOUS_POINTS FROM GYM_DATA WHERE GD_ID_GYM = $id AND GD_TIMESTAMP < (SELECT MAX(GD_TIMESTAMP) FROM GYM_DATA WHERE GD_ID_GYM = $id) ORDER BY GD_TIMESTAMP DESC LIMIT 1)' +
+    db.get(
+        'WITH LAST AS (SELECT DISTINCT GD_POINTS AS ACTUAL_POINTS FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1),' +
+        'SECOND_LAST AS (SELECT DISTINCT GD_POINTS AS PREVIOUS_POINTS FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1 OFFSET 1)' +
+        'SELECT CASE WHEN ACTUAL_POINTS > PREVIOUS_POINTS THEN 1 WHEN ACTUAL_POINTS < PREVIOUS_POINTS THEN 2 ELSE 0 END AS GROWING FROM LAST LEFT JOIN SECOND_LAST', {
+            $id: id
+        }, callback);
+}
+
+function getLevel(lvl, callback) {
+    db.get('SELECT * FROM LEVELS WHERE L_ID = $lvl', {
+        $lvl: lvl
+    }, callback);
+}
+
+//////////////////////////
 
 var us;
 
@@ -170,22 +213,6 @@ router.route('/user/:token/:lt/pkmns')
                     pkmns.push(data);
                 }
             });
-            /*
-                        var o = req.params.order;
-                        var order = iv;
-                        if (o) {
-                            if (o === 'ab' || o === 'alphabetic' || o === 'name') {
-                                order = alphabetic;
-                            } else if (o === 'cp') {
-                                order = cp;
-                            } else if (o === 'iv' || o === 'IV') {
-                                order = iv;
-                            } else if (o === 'n' || o === 'number') {
-                                order = number;
-                            }
-                        }
-
-                        pkmns.sort(order);*/
             res.status(200).json({
                 message: 'List retreived successfully',
                 data: pkmns
@@ -208,8 +235,17 @@ var speed = 100;
 
 router.route('/gym')
     .get((req, res) => {
-        res.status(200).json({
-            data: filterGyms()
+        getFatGyms((err, gyms) => {
+            if (!err) {
+                res.status(200).json({
+                    data: gyms //filterGyms()
+                });
+            } else {
+                console.log('[PogoBot].[Database] - Error: ' + err);
+                res.status(500).json({
+                    message: 'Error while fetching the gym list'
+                });
+            }
         });
     });
 
@@ -217,6 +253,38 @@ router.route('/gym/:id')
     .get((req, res) => {
         res.status(200).json({
             data: gyms[req.params.id]
+        });
+    });
+
+router.route('/gym/:id/growing')
+    .get((req, res) => {
+        isGymGrowing(req.params.id, function (err, data) {
+            if (!err) {
+                res.status(200).json({
+                    growing: data.GROWING
+                });
+            } else {
+                console.log('[PogoBot].[Database] - Error: ' + err);
+                res.status(500).json({
+                    message: 'Error while calculating if growing'
+                });
+            }
+        });
+    });
+
+router.route('/level/:id')
+    .get((req, res) => {
+        getLevel(req.params.id, function (err, data) {
+            if (!err) {
+                res.status(200).json({
+                    data: data
+                });
+            } else {
+                console.log('[PogoBot].[Database] - Error: ' + err);
+                res.status(500).json({
+                    message: 'Error while calculating if growing'
+                });
+            }
         });
     });
 
@@ -229,6 +297,8 @@ function filterGyms() {
         obj.id = gym.gym_state.fort_data.id;
         obj.name = gym.name;
         obj.points = gym.gym_state.fort_data.gym_points;
+        obj.level = getLevelAndMax(obj.points).level;
+        obj.level_max_points = getLevelAndMax(obj.points).max_points;
         obj.is_in_battle = gym.gym_state.fort_data.is_in_battle;
         obj.team = gym.gym_state.fort_data.owned_by_team;
         obj.lat = gym.gym_state.fort_data.latitude;
@@ -238,7 +308,53 @@ function filterGyms() {
     }
 
     return result;
-}
+};
+
+function getLevelAndMax(points) {
+    var level = 1;
+    var max = 2000;
+    if (points >= 2000) {
+        level = 2;
+        max = 4000;
+        if (points >= 4000) {
+            level = 3;
+            max = 8000;
+            if (points >= 8000) {
+                level = 4;
+                max = 12000;
+                if (points >= 12000) {
+                    level = 5;
+                    max = 16000;
+                    if (points >= 16000) {
+                        level = 6;
+                        max = 20000;
+                        if (points >= 20000) {
+                            level = 7;
+                            max = 30000;
+                            if (points >= 30000) {
+                                level = 8;
+                                max = 40000;
+                                if (points >= 40000) {
+                                    level = 9;
+                                    max = 50000;
+                                    if (points >= 50000) {
+                                        level = 10;
+                                        max = 50000;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return {
+        level: level,
+        max_points: max
+    };
+
+};
 
 function startGymsDaemon() {
     initClient().then(() => {
@@ -252,7 +368,7 @@ function initClient() {
     var login = new pogobuf.PTCLogin();
     gymsClient = new pogobuf.Client();
 
-    return login.login('username925363', 'password')
+    return login.login('clarinetto2', 'password')
         .then(token => {
             console.log('[PogoBuf].[GymsDaemon] - Login Successful ' + token);
             gymsClient.setAuthInfo('ptc', token);
@@ -270,10 +386,14 @@ function gyms_loop() {
             loopGyms.forEach(function (gym) {
                 gym.visit_timestamp = new Date().getTime();
                 gyms[gym.gym_state.fort_data.id] = gym;
+                // STORE IN DB //
+                storeGymAndData(gym);
             });
         } else {
             loopGyms.visit_timestamp = new Date().getTime();
             gyms[loopGyms.gym_state.fort_data.id] = loopGyms;
+            // STORE IN DB //
+            storeGymAndData(loopGyms);
         }
 
         var newGymsPathStep = (gymsPathStep + 1) % gymsPath.length;
@@ -283,8 +403,8 @@ function gyms_loop() {
     }).then(() => {
         gyms_loop();
     }).catch((ecc) => {
-	console.log("[PogoBuf].[GymsDaemon] - Token not valid, reinitializing daemon");
-	startGymsDaemon();
+        console.log('[PogoBuf].[GymsDaemon] - An error occurred or Token not valid, reinitializing daemon');
+        startGymsDaemon();
     });
 }
 
@@ -311,11 +431,13 @@ rl.on('line', function (line) {
 function gracefulShutdown() {
     server.close(function () {
         console.log('[PogoBot] Closed out remaining connections.');
+        db.close();
         process.exit();
     });
 
     setTimeout(function () {
         console.error('[PogoBot] Closing connections timeouted, forcefully shutting down');
+        db.close();
         process.exit();
     }, 10 * 1000);
 }

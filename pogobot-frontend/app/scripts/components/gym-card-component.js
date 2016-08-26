@@ -6,8 +6,22 @@ angular.module('pogobotFrontendApp')
         bindings: {
             gym: '='
         },
-        controller: function () {
+        controller: ['Level', 'Gym', function (Level, Gym) {
             var self = this;
+            self.nextLevelPoints = 0;
+
+            Level.get({
+                id: (self.gym.GD_LEVEL < 10) ? self.gym.GD_LEVEL + 1 : self.gym.GD_LEVEL
+            }, function (res) {
+                self.nextLevelPoints = res.data.L_MIN_POINTS;
+            });
+
+            Gym.growing({
+                id: self.gym.G_ID
+            }, function (res) {
+                self.growing = res.growing;
+            });
+
             self.getTeam = function (id) {
                 var ret = '';
                 switch (id) {
@@ -24,37 +38,5 @@ angular.module('pogobotFrontendApp')
                 return ret;
             };
 
-            self.getLevel = function (points) {
-                var level = 1;
-                if (points >= 2000) {
-                    level = 2;
-                    if (points >= 4000) {
-                        level = 3;
-                        if (points >= 8000) {
-                            level = 4;
-                            if (points >= 12000) {
-                                level = 5;
-                                if (points >= 16000) {
-                                    level = 6;
-                                    if (points >= 20000) {
-                                        level = 7;
-                                        if (points >= 30000) {
-                                            level = 8;
-                                            if (points >= 40000) {
-                                                level = 9;
-                                                if (points >= 50000) {
-                                                    level = 10;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                return level;
-
-            };
-        }
+        }]
     });
