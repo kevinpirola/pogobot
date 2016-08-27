@@ -56,6 +56,35 @@ User.prototype.getToken = function () {
 
 //////////////////////////
 
+/////// PARAMETERS ///////
+var argv = require('minimist')(process.argv.slice(2));
+
+if (!argv.u) {
+    console.log('You should specify a username using: -u <yourUsername>');
+    process.exit(1);
+}
+if (!argv.p) {
+    console.log('You should specify a password using: -p <yourPassword>');
+    process.exit(1);
+}
+var login, loginMethod;
+if (argv.a) {
+    if (argv.a === 'ptc') {
+        login = new pogobuf.PTCLogin();
+        loginMethod = 'ptc';
+    } else if (argv.a === 'google') {
+        login = new pogobuf.GoogleLogin();
+        loginMethod = 'google';
+    } else {
+        console.log('[PogoBot] - ERROR, you specified an invalid login method. Current valid method are ptc or google');
+    }
+} else {
+    console.log('[PogoBot] - No login method specified, using PTC as default');
+    login = new pogobuf.PTCLogin();
+    loginMethod = 'ptc';
+}
+//////////////////////////
+
 //////// DATABASE ////////
 
 function insertGymIfNew(gym) {
@@ -365,13 +394,13 @@ function startGymsDaemon() {
 }
 
 function initClient() {
-    var login = new pogobuf.PTCLogin();
+    //var login = new pogobuf.PTCLogin();
     gymsClient = new pogobuf.Client();
 
-    return login.login('clarinetto2', 'password')
+    return login.login(argv.u, argv.p)
         .then(token => {
-            console.log('[PogoBuf].[GymsDaemon] - Login Successful ' + token);
-            gymsClient.setAuthInfo('ptc', token);
+            console.log('[PogoBuf].[GymsDaemon] - Login Successful for ' + argv.u);
+            gymsClient.setAuthInfo(loginMethod, token);
             gymsClient.setPosition(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon);
             return gymsClient.init();
         }, (err) => {

@@ -2,7 +2,7 @@
     <md-card-title>
         <md-card-title-text>
             <span class="md-title">{{$ctrl.gym.G_NAME}}</span>
-            <span class="md-subhead">Level {{$ctrl.gym.GD_LEVEL}} - {{$ctrl.gym.GD_POINTS}} / {{$ctrl.nextLevelPoints}} points <i class="fa small growing" ng-class="{'fa-arrow-up green': $ctrl.growing === 1, 'fa-arrow-down red': $ctrl.growing === 2, 'fa-asterisk': $ctrl.growing === 0}"></i></span>
+            <span class="md-subhead"><i class="fa small growing" ng-class="{'fa-arrow-up green': $ctrl.growing === 1, 'fa-arrow-down red': $ctrl.growing === 2, 'fa-asterisk': $ctrl.growing === 0}"></i> Level {{$ctrl.gym.GD_LEVEL}} - {{$ctrl.gym.GD_POINTS}} / {{$ctrl.nextLevelPoints}} pts</span>
         </md-card-title-text>
         <md-card-title-media>
             <div class="md-media-sm card-media"><img ng-src="../images/team-{{$ctrl.getTeam($ctrl.gym.GD_OWNER_TEAM)}}-vector.svg"></div>
