@@ -30,7 +30,9 @@ function insertNewDataUpdate(gym) {
         $owner: gym.gym_state.fort_data.owned_by_team,
         $inbattle: gym.gym_state.fort_data.is_in_battle
     }, function (err) {
-        console.log('[PogoBot].[ER_0005] - Error while inserting new gym data: ' + err);
+        if (err) {
+            console.log('[PogoBot].[ER_0005] - Error while inserting new gym data: ' + err);
+        }
     });
 };
 
@@ -80,7 +82,7 @@ module.exports = {
     },
 
     insertOrUpdatePkmn: function (pkmn, callback) {
-        db.run('INSERT INTO POKEMONS (P_ID, P_PKMN_ID, P_CP, P_STAMINA, P_STAMINA_MAX, P_ID_MOVE_1, P_ID_MOVE_2, P_OWNER_NAME, P_HEIGHT, P_WEIGHT, P_IND_ATK, P_IND_DEF, P_IND_STM, P_CP_MULTIPLIER, P_UPGRADES, P_NICKNAME) VALUES ($id, $pkmn_id, $cp, $stm, $stm_max, $mv1, $mv2, $owner_name, $height, $weight, $ind_atk, $ind_def, $ind_stm, $cp_multiplier, $upgrades, $nickname)', {
+        db.run('INSERT INTO POKEMONS (P_ID, P_ID_SPECIES, P_CP, P_STAMINA, P_STAMINA_MAX, P_ID_MOVE_1, P_ID_MOVE_2, P_OWNER_NAME, P_HEIGHT, P_WEIGHT, P_IND_ATK, P_IND_DEF, P_IND_STM, P_CP_MULTIPLIER, P_UPGRADES, P_NICKNAME) VALUES ($id, $pkmn_id, $cp, $stm, $stm_max, $mv1, $mv2, $owner_name, $height, $weight, $ind_atk, $ind_def, $ind_stm, $cp_multiplier, $upgrades, $nickname)', {
             $id: pkmn.id,
             $pkmn_id: pkmn.pokemon_id,
             $cp: pkmn.cp,
@@ -102,5 +104,58 @@ module.exports = {
 
     close: function () {
         db.close();
+    },
+
+    populateTypes: function (file) {
+        console.log('[PogoBot] - Creating default types');
+        var types = require(file);
+        db.serialize(function () {
+            db.run('DELETE FROM TYPES', function (err) {
+                if (err) {
+                    console.log('[PogoBot].[ER_0015] - Unable to delete types: ' + err);
+                }
+            });
+            types.forEach(function (t, index) {
+                db.run('INSERT INTO TYPES (T_ID, T_NAME, T_EFFICIENCY, T_COLOR) VALUES ($id, $name, $eff, $col)', {
+                    $id: (index + 1),
+                    $name: t.name,
+                    $eff: t.eff,
+                    $col: t.color
+                }, function (err) {
+                    if (err) {
+                        console.log('[PogoBot].[ER_0016] - Unable to insert new type: ' + err);
+                    }
+                });
+            });
+            console.log('[PogoBot] - Types, DONE.');
+        });
+    },
+
+    populateSpecies: function (file) {
+        console.log('[PogoBot] - Creating default pokemon species data');
+        var species = require(file);
+        db.serialize(function () {
+            db.run('DELETE FROM POKEMON_SPECIES', function (err) {
+                if (err) {
+                    console.log('[PogoBot].[ER_0017] - Unable to delete species: ' + err);
+                }
+            });
+            for (var sp in species) {
+                if (sp <= 151) {
+                    db.run('INSERT INTO POKEMON_SPECIES VALUES ($id, $name, $rarity, (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type1), (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type2))', {
+                        $id: sp,
+                        $name: species[sp].name,
+                        $rarity: species[sp].rarity,
+                        $type1: species[sp].types[0].type,
+                        $type2: (species[sp].types.length > 1) ? species[sp].types[1].type : null
+                    }, function (err) {
+                        if (err) {
+                            console.log('[PogoBot].[ER_0018] - Unable to insert new specie: ' + err);
+                        }
+                    });
+                }
+            }
+            console.log('[PogoBot] - Species, DONE.');
+        });
     }
 };

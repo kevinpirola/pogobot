@@ -308,7 +308,7 @@ router.route('/gym/:id')
     .get((req, res) => {
         db.getGymAndStatus(req.params.id, function (err, data) {
             if (!err) {
-                console.log(gyms[req.params.id].gym_state.memberships);
+                //                console.log(gyms[req.params.id].gym_state.memberships);
                 res.status(200).json({
                     data: data //gyms[req.params.id]
                 });
@@ -420,6 +420,12 @@ rl.on('line', function (line) {
     switch (line) {
     case 'stop':
         gracefulShutdown();
+        break;
+    case 'populate-types':
+        db.populateTypes('../res/types.json');
+        break;
+    case 'populate-species':
+        db.populateSpecies('../res/pokemon.json');
         break;
     }
 });
