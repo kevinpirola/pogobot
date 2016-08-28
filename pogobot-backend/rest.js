@@ -12,8 +12,9 @@ var bodyParser = require('body-parser');
 var readline = require('readline');
 const pogobuf = require('pogobuf');
 const pokemonList = require('./res/pokemon.json');
-const sqlite = require('sqlite3').verbose();
-const db = new sqlite.Database('pogobot.db');
+//const sqlite = require('sqlite3').verbose();
+//const db = new sqlite.Database('pogobot.db');
+const db = require('./src/database.js');
 
 var app = express();
 
@@ -89,7 +90,7 @@ if (argv.a) {
 
 //////// DATABASE ////////
 
-function insertGymIfNew(gym) {
+/*function insertGymIfNew(gym) {
     db.get('SELECT * FROM GYMS WHERE G_ID = $id LIMIT 1', {
         $id: gym.gym_state.fort_data.id
     }, function (err, row) {
@@ -151,7 +152,6 @@ function getGymAndStatus(id, callback) {
 }
 
 function isGymGrowing(id, callback) {
-    //'SECOND_LAST AS (SELECT DISTINCT GD_POINTS AS PREVIOUS_POINTS FROM GYM_DATA WHERE GD_ID_GYM = $id AND GD_TIMESTAMP < (SELECT MAX(GD_TIMESTAMP) FROM GYM_DATA WHERE GD_ID_GYM = $id) ORDER BY GD_TIMESTAMP DESC LIMIT 1)' +
     db.get(
         'WITH LAST AS (SELECT DISTINCT GD_POINTS AS ACTUAL_POINTS FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1),' +
         'SECOND_LAST AS (SELECT DISTINCT GD_POINTS AS PREVIOUS_POINTS FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1 OFFSET 1)' +
@@ -167,8 +167,25 @@ function getLevel(lvl, callback) {
 }
 
 function insertOrUpdatePkmn(pkmn, callback) {
-
-}
+    db.run('INSERT INTO POKEMONS (P_ID, P_PKMN_ID, P_CP, P_STAMINA, P_STAMINA_MAX, P_ID_MOVE_1, P_ID_MOVE_2, P_OWNER_NAME, P_HEIGHT, P_WEIGHT, P_IND_ATK, P_IND_DEF, P_IND_STM, P_CP_MULTIPLIER, P_UPGRADES, P_NICKNAME) VALUES ($id, $pkmn_id, $cp, $stm, $stm_max, $mv1, $mv2, $owner_name, $height, $weight, $ind_atk, $ind_def, $ind_stm, $cp_multiplier, $upgrades, $nickname)', {
+        $id: pkmn.id,
+        $pkmn_id: pkmn.pokemon_id,
+        $cp: pkmn.cp,
+        $stm: pkmn.pokemon_stamina,
+        $stm_max: pkmn.pokemon_stamina_max,
+        $mv1: pkmn.move1,
+        $mv2: pkmn.move2,
+        $owner_name: pkmn.owner,
+        $height: pkmn.height_m,
+        $weight: pkmn.weight_kg,
+        $ind_atk: pkmn.individual_attack,
+        $ind_def: pkmn.individual_defense,
+        $ind_stm: pkmn.individual_stamina,
+        $cp_multiplier: pkmn.cp_multiplier,
+        $upgrades: pkmn.number_upgrades,
+        $nickname: pkmn.nickname
+    }, callback);
+}*/
 
 //////////////////////////
 
@@ -273,7 +290,7 @@ var speed = 100;
 
 router.route('/gym')
     .get((req, res) => {
-        getFatGyms((err, gyms) => {
+        db.getFatGyms((err, gyms) => {
             if (!err) {
                 res.status(200).json({
                     data: gyms //filterGyms()
@@ -289,7 +306,7 @@ router.route('/gym')
 
 router.route('/gym/:id')
     .get((req, res) => {
-        getGymAndStatus(req.params.id, function (err, data) {
+        db.getGymAndStatus(req.params.id, function (err, data) {
             if (!err) {
                 console.log(gyms[req.params.id].gym_state.memberships);
                 res.status(200).json({
@@ -306,7 +323,7 @@ router.route('/gym/:id')
 
 router.route('/gym/:id/growing')
     .get((req, res) => {
-        isGymGrowing(req.params.id, function (err, data) {
+        db.isGymGrowing(req.params.id, function (err, data) {
             if (!err) {
                 res.status(200).json({
                     growing: data.GROWING
@@ -322,7 +339,7 @@ router.route('/gym/:id/growing')
 
 router.route('/level/:id')
     .get((req, res) => {
-        getLevel(req.params.id, function (err, data) {
+        db.getLevel(req.params.id, function (err, data) {
             if (!err) {
                 res.status(200).json({
                     data: data
@@ -366,13 +383,13 @@ function gyms_loop() {
                 gym.visit_timestamp = new Date().getTime();
                 gyms[gym.gym_state.fort_data.id] = gym;
                 // STORE IN DB //
-                storeGymAndData(gym);
+                db.storeGymAndData(gym);
             });
         } else {
             loopGyms.visit_timestamp = new Date().getTime();
             gyms[loopGyms.gym_state.fort_data.id] = loopGyms;
             // STORE IN DB //
-            storeGymAndData(loopGyms);
+            db.storeGymAndData(loopGyms);
         }
 
         var newGymsPathStep = (gymsPathStep + 1) % gymsPath.length;
