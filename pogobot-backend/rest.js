@@ -11,7 +11,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var readline = require('readline');
 const pogobuf = require('pogobuf');
-const pokemonList = require('./data/pokemon.json');
+const pokemonList = require('./res/pokemon.json');
 const sqlite = require('sqlite3').verbose();
 const db = new sqlite.Database('pogobot.db');
 
@@ -60,14 +60,16 @@ User.prototype.getToken = function () {
 var argv = require('minimist')(process.argv.slice(2));
 
 if (!argv.u) {
-    console.log('You should specify a username using: -u <yourUsername>');
+    console.log('[PogoBot].[ER_0001] You should specify a username using: -u <yourUsername>');
     process.exit(1);
 }
 if (!argv.p) {
-    console.log('You should specify a password using: -p <yourPassword>');
+    console.log('[PogoBot].[ER_0002] You should specify a password using: -p <yourPassword>');
     process.exit(1);
 }
+
 var login, loginMethod;
+
 if (argv.a) {
     if (argv.a === 'ptc') {
         login = new pogobuf.PTCLogin();
@@ -76,7 +78,7 @@ if (argv.a) {
         login = new pogobuf.GoogleLogin();
         loginMethod = 'google';
     } else {
-        console.log('[PogoBot] - ERROR, you specified an invalid login method. Current valid method are ptc or google');
+        console.log('[PogoBot].[ER_0003] - You specified an invalid login method. Current valid method are ptc or google');
     }
 } else {
     console.log('[PogoBot] - No login method specified, using PTC as default');
@@ -91,15 +93,19 @@ function insertGymIfNew(gym) {
     db.get('SELECT * FROM GYMS WHERE G_ID = $id LIMIT 1', {
         $id: gym.gym_state.fort_data.id
     }, function (err, row) {
-        if (!row) {
-            console.log('[PogoBot].[Database] - Added a new gym to the list');
-            db.run('INSERT INTO GYMS (G_ID, G_LAT, G_LON, G_NAME, G_IMG) VALUES ($id, $lat, $lon, $name, $img)', {
-                $id: gym.gym_state.fort_data.id,
-                $lat: gym.gym_state.fort_data.latitude,
-                $lon: gym.gym_state.fort_data.longitude,
-                $name: gym.name,
-                $img: gym.urls[0]
-            });
+        if (!err) {
+            if (!row) {
+                console.log('[PogoBot].[Database] - Added a new gym to the list');
+                db.run('INSERT INTO GYMS (G_ID, G_LAT, G_LON, G_NAME, G_IMG) VALUES ($id, $lat, $lon, $name, $img)', {
+                    $id: gym.gym_state.fort_data.id,
+                    $lat: gym.gym_state.fort_data.latitude,
+                    $lon: gym.gym_state.fort_data.longitude,
+                    $name: gym.name,
+                    $img: gym.urls[0]
+                });
+            }
+        } else {
+            console.log('[PogoBot].[ER_0004] - Error while checking if gym exists: ' + err);
         }
     });
 }
@@ -111,6 +117,8 @@ function insertNewDataUpdate(gym) {
         $points: gym.gym_state.fort_data.gym_points,
         $owner: gym.gym_state.fort_data.owned_by_team,
         $inbattle: gym.gym_state.fort_data.is_in_battle
+    }, function (err) {
+        console.log('[PogoBot].[ER_0005] - Error while inserting new gym data: ' + err);
     });
 }
 
@@ -136,8 +144,8 @@ function getGym(id, callback) {
     }, callback);
 }
 
-function getGymData(id, callback) {
-    db.get('SELECT * FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1', {
+function getGymAndStatus(id, callback) {
+    db.get('SELECT * FROM GYM_DATA JOIN GYMS ON G_ID = GD_ID_GYM JOIN LEVELS ON GD_LEVEL = L_ID WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1', {
         $id: id
     }, callback);
 }
@@ -158,6 +166,10 @@ function getLevel(lvl, callback) {
     }, callback);
 }
 
+function insertOrUpdatePkmn(pkmn, callback) {
+
+}
+
 //////////////////////////
 
 var us;
@@ -169,16 +181,10 @@ app.use(bodyParser.json());
 
 // Add headers
 app.use(function (req, res, next) {
-    // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
-    // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
-    // Pass to next layer of middleware
     next();
 });
 
@@ -201,7 +207,7 @@ router.route('/login')
             client.setAuthInfo(req.body.loginType, token);
             return client.init();
         }, (err) => {
-            console.log('[PogoBuf] - ' + err);
+            console.log('[PogoBot].[ER_0006] - Error while login ' + req.body.user.username + ': ' + err);
             res.status(401).send('Error while login, retry');
         }).then(() => {
             res.status(200).json({
@@ -209,11 +215,11 @@ router.route('/login')
                 token: us.getToken()
             });
         }, (err) => {
-            console.log('[PogoBuf] - ' + err);
+            console.log('[PogoBot].[ER_0007] - Failed client init: ' + err);
             res.status(401).json({
                 message: 'Unable to login'
             });
-        })
+        });
     });
 
 router.route('/user/:token/:lt/pkmns')
@@ -223,7 +229,7 @@ router.route('/user/:token/:lt/pkmns')
         client.init().then(() => {
             return client.getInventory(0);
         }, (err) => {
-            console.log('[PogoBuf] - ' + err);
+            console.log('[PogoBot].[ER_0000] - Unknown error: ' + err);
             res.status(401).json({
                 message: 'Invalid Token or generic error'
             });
@@ -247,7 +253,10 @@ router.route('/user/:token/:lt/pkmns')
                 data: pkmns
             });
         }, err => {
-
+            console.log('[PogoBot].[ER_0008] - Unable to fetch the inventory: ' + err);
+            res.status(401).json({
+                message: 'Unable to fetch the inventory'
+            });
         });
     });
 
@@ -270,7 +279,7 @@ router.route('/gym')
                     data: gyms //filterGyms()
                 });
             } else {
-                console.log('[PogoBot].[Database] - Error: ' + err);
+                console.log('[PogoBot].[ER_0009].[Database] - Error while fetching the list: ' + err);
                 res.status(500).json({
                     message: 'Error while fetching the gym list'
                 });
@@ -280,8 +289,18 @@ router.route('/gym')
 
 router.route('/gym/:id')
     .get((req, res) => {
-        res.status(200).json({
-            data: gyms[req.params.id]
+        getGymAndStatus(req.params.id, function (err, data) {
+            if (!err) {
+                console.log(gyms[req.params.id].gym_state.memberships);
+                res.status(200).json({
+                    data: data //gyms[req.params.id]
+                });
+            } else {
+                console.log('[PogoBot].[ER_0010].[Database] - Error while fetching the gym: ' + err);
+                res.status(500).json({
+                    message: 'Error while fetching the gym ' + err
+                });
+            }
         });
     });
 
@@ -293,7 +312,7 @@ router.route('/gym/:id/growing')
                     growing: data.GROWING
                 });
             } else {
-                console.log('[PogoBot].[Database] - Error: ' + err);
+                console.log('[PogoBot].[ER_0011].[Database] - Error while calculating growth: ' + err);
                 res.status(500).json({
                     message: 'Error while calculating if growing'
                 });
@@ -309,92 +328,23 @@ router.route('/level/:id')
                     data: data
                 });
             } else {
-                console.log('[PogoBot].[Database] - Error: ' + err);
+                console.log('[PogoBot].[ER_0012].[Database] - Error while fetching level data: ' + err);
                 res.status(500).json({
-                    message: 'Error while calculating if growing'
+                    message: 'Error while fetching level data'
                 });
             }
         });
     });
 
-function filterGyms() {
-    var result = [];
-
-    for (i in gyms) {
-        var gym = gyms[i];
-        var obj = {};
-        obj.id = gym.gym_state.fort_data.id;
-        obj.name = gym.name;
-        obj.points = gym.gym_state.fort_data.gym_points;
-        obj.level = getLevelAndMax(obj.points).level;
-        obj.level_max_points = getLevelAndMax(obj.points).max_points;
-        obj.is_in_battle = gym.gym_state.fort_data.is_in_battle;
-        obj.team = gym.gym_state.fort_data.owned_by_team;
-        obj.lat = gym.gym_state.fort_data.latitude;
-        obj.lon = gym.gym_state.fort_data.longitude;
-        obj.visit_timestamp = gym.visit_timestamp;
-        result.push(obj);
-    }
-
-    return result;
-};
-
-function getLevelAndMax(points) {
-    var level = 1;
-    var max = 2000;
-    if (points >= 2000) {
-        level = 2;
-        max = 4000;
-        if (points >= 4000) {
-            level = 3;
-            max = 8000;
-            if (points >= 8000) {
-                level = 4;
-                max = 12000;
-                if (points >= 12000) {
-                    level = 5;
-                    max = 16000;
-                    if (points >= 16000) {
-                        level = 6;
-                        max = 20000;
-                        if (points >= 20000) {
-                            level = 7;
-                            max = 30000;
-                            if (points >= 30000) {
-                                level = 8;
-                                max = 40000;
-                                if (points >= 40000) {
-                                    level = 9;
-                                    max = 50000;
-                                    if (points >= 50000) {
-                                        level = 10;
-                                        max = 50000;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return {
-        level: level,
-        max_points: max
-    };
-
-};
-
 function startGymsDaemon() {
     initClient().then(() => {
         gyms_loop();
     }, (err) => {
-        console.log('[PogoBuf].[GymsDaemon] - Error in initialization: ' + err);
+        console.log('[PogoBuf].[ER_0013].[GymsDaemon] - Error in initialization: ' + err);
     });
 }
 
 function initClient() {
-    //var login = new pogobuf.PTCLogin();
     gymsClient = new pogobuf.Client();
 
     return login.login(argv.u, argv.p)
@@ -404,7 +354,7 @@ function initClient() {
             gymsClient.setPosition(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon);
             return gymsClient.init();
         }, (err) => {
-            console.log('[PogoBuf].[GymsDaemon] - Error while login: ' + err);
+            console.log('[PogoBuf].[ER_0014].[GymsDaemon] - Error while login: ' + err);
         });
 }
 
@@ -432,7 +382,7 @@ function gyms_loop() {
     }).then(() => {
         gyms_loop();
     }).catch((ecc) => {
-        console.log('[PogoBuf].[GymsDaemon] - An error occurred or Token not valid, reinitializing daemon');
+        console.log('[PogoBuf].[ER_0000].[GymsDaemon] - An error occurred or Token not valid, reinitializing daemon');
         startGymsDaemon();
     });
 }

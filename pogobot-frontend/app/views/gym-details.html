@@ -1,12 +1,12 @@
 <md-content class="gym-details">
     <div class="gym-pic">
-        <img ng-src="{{$ctrl.gym.urls[0]}}">
+        <img ng-src="{{$ctrl.gym.G_IMG}}">
     </div>
     <md-card md-theme="default" md-theme-watch>
         <md-card-title>
             <md-card-title-text class="text-center">
-                <span class="md-title">{{$ctrl.gym.name}}</span>
-                <span class="md-subhead">Level ? - {{$ctrl.gym.gym_state.fort_data.gym_points}} points <i class="fa small"></i></span>
+                <span class="md-title">{{$ctrl.gym.G_NAME}}</span>
+                <span class="md-subhead">Level {{$ctrl.gym.GD_LEVEL}} - {{$ctrl.gym.GD_POINTS}} / {{$ctrl.nextLevelPoints}} points <i class="fa small"></i></span>
             </md-card-title-text>
         </md-card-title>
         <md-card-content>
