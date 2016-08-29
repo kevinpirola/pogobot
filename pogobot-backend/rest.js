@@ -308,7 +308,7 @@ router.route('/gym/:id')
     .get((req, res) => {
         db.getGymAndStatus(req.params.id, function (err, data) {
             if (!err) {
-                //                console.log(gyms[req.params.id].gym_state.memberships);
+                console.log(gyms[req.params.id].gym_state.memberships);
                 res.status(200).json({
                     data: data //gyms[req.params.id]
                 });
@@ -316,6 +316,22 @@ router.route('/gym/:id')
                 console.log('[PogoBot].[ER_0010].[Database] - Error while fetching the gym: ' + err);
                 res.status(500).json({
                     message: 'Error while fetching the gym ' + err
+                });
+            }
+        });
+    });
+
+router.route('/gym/:id/pokemon')
+    .get((req, res) => {
+        db.getPokemons(req.params.id, function (err, data) {
+            if (!err) {
+                res.status(200).json({
+                    data: data
+                });
+            } else {
+                console.log('[PogoBot].[ER_0023].[Database] - Error while fetching pokemons for the gym. ' + err);
+                res.status(500).json({
+                    message: 'Error while fetching the pokemons ' + err
                 });
             }
         });
@@ -378,18 +394,21 @@ function initClient() {
 function gyms_loop() {
     console.log('[PogoBuf].[GymsDaemon] - Looping...');
     $gym.getGyms(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon, gymsClient, pogobuf).then((loopGyms) => {
+        var timestamp = new Date().getTime();
         if (Array.isArray(loopGyms)) {
             loopGyms.forEach(function (gym) {
                 gym.visit_timestamp = new Date().getTime();
                 gyms[gym.gym_state.fort_data.id] = gym;
                 // STORE IN DB //
-                db.storeGymAndData(gym);
+                db.storeGymAndData(gym, timestamp);
+                db.storeGymPokemons(gym, timestamp);
             });
         } else {
             loopGyms.visit_timestamp = new Date().getTime();
             gyms[loopGyms.gym_state.fort_data.id] = loopGyms;
             // STORE IN DB //
-            db.storeGymAndData(loopGyms);
+            db.storeGymAndData(loopGyms, timestamp);
+            db.storeGymPokemons(loopGyms, timestamp);
         }
 
         var newGymsPathStep = (gymsPathStep + 1) % gymsPath.length;
@@ -398,8 +417,8 @@ function gyms_loop() {
         return promise;
     }).then(() => {
         gyms_loop();
-    }).catch((ecc) => {
-        console.log('[PogoBuf].[ER_0000].[GymsDaemon] - An error occurred or Token not valid, reinitializing daemon');
+    }).catch((err) => {
+        console.log('[PogoBuf].[ER_0000].[GymsDaemon] - An error occurred or Token not valid, reinitializing daemon' + err);
         startGymsDaemon();
     });
 }
@@ -426,6 +445,9 @@ rl.on('line', function (line) {
         break;
     case 'populate-species':
         db.populateSpecies('../res/pokemon.json');
+        break;
+    case 'reset-moves':
+        db.resetMoves();
         break;
     }
 });

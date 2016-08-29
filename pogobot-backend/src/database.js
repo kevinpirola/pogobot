@@ -22,10 +22,10 @@ function insertGymIfNew(gym) {
     });
 };
 
-function insertNewDataUpdate(gym) {
+function insertNewDataUpdate(gym, timestamp) {
     db.run('INSERT INTO GYM_DATA (GD_ID_GYM, GD_TIMESTAMP, GD_POINTS, GD_LEVEL, GD_OWNER_TEAM, GD_IS_IN_BATTLE) VALUES ($id, $time, $points, (SELECT L_ID FROM LEVELS WHERE $points >= L_MIN_POINTS ORDER BY L_MIN_POINTS DESC LIMIT 1), $owner, $inbattle)', {
         $id: gym.gym_state.fort_data.id,
-        $time: new Date().getTime(),
+        $time: timestamp,
         $points: gym.gym_state.fort_data.gym_points,
         $owner: gym.gym_state.fort_data.owned_by_team,
         $inbattle: gym.gym_state.fort_data.is_in_battle
@@ -36,12 +36,41 @@ function insertNewDataUpdate(gym) {
     });
 };
 
+function insertOrUpdatePkmn(pkmn, callback) {
+    db.run('INSERT OR REPLACE INTO POKEMONS (P_ID, P_ID_SPECIES, P_CP, P_STAMINA, P_STAMINA_MAX, P_ID_MOVE_1, P_ID_MOVE_2, P_OWNER_NAME, P_HEIGHT, P_WEIGHT, P_IND_ATK, P_IND_DEF, P_IND_STM, P_CP_MULTIPLIER, P_UPGRADES, P_NICKNAME) VALUES ($id, $pkmn_id, $cp, $stm, $stm_max, $mv1, $mv2, $owner_name, $height, $weight, $ind_atk, $ind_def, $ind_stm, $cp_multiplier, $upgrades, $nickname)', {
+        $id: pkmn.id,
+        $pkmn_id: pkmn.pokemon_id,
+        $cp: pkmn.cp,
+        $stm: pkmn.stamina,
+        $stm_max: pkmn.stamina_max,
+        $mv1: pkmn.move_1,
+        $mv2: pkmn.move_2,
+        $owner_name: pkmn.owner_name,
+        $height: pkmn.height_m,
+        $weight: pkmn.weight_kg,
+        $ind_atk: pkmn.individual_attack,
+        $ind_def: pkmn.individual_defense,
+        $ind_stm: pkmn.individual_stamina,
+        $cp_multiplier: pkmn.cp_multiplier,
+        $upgrades: pkmn.num_upgrades,
+        $nickname: pkmn.nickname
+    }, callback);
+};
+
+function insertRelationship(pkmn_id, gym_id, timestamp, callback) {
+    db.run('INSERT INTO GYM_DATA_POKEMONS (GDP_ID_GYM_DATA, GDP_ID_POKEMON) VALUES ((SELECT GD_ID FROM GYM_DATA WHERE GD_ID_GYM = $gym_id AND GD_TIMESTAMP = $ts LIMIT 1), $pkmn_id)', {
+        $gym_id: gym_id,
+        $ts: timestamp,
+        $pkmn_id: pkmn_id
+    }, callback);
+};
+
 module.exports = {
 
-    storeGymAndData: function (gym) {
+    storeGymAndData: function (gym, timestamp) {
         db.serialize(function () {
             insertGymIfNew(gym);
-            insertNewDataUpdate(gym);
+            insertNewDataUpdate(gym, timestamp);
         });
     },
 
@@ -75,31 +104,38 @@ module.exports = {
             }, callback);
     },
 
+    getPokemons: function (id, callback) {
+        db.all('SELECT * FROM POKEMONS WHERE P_ID IN (SELECT GDP_ID_POKEMON FROM GYM_DATA_POKEMONS WHERE GDP_ID_GYM_DATA = (SELECT GD_ID FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1))', {
+            $id: id
+        }, callback);
+    },
+
     getLevel: function getLevel(lvl, callback) {
         db.get('SELECT * FROM LEVELS WHERE L_ID = $lvl', {
             $lvl: lvl
         }, callback);
     },
 
-    insertOrUpdatePkmn: function (pkmn, callback) {
-        db.run('INSERT INTO POKEMONS (P_ID, P_ID_SPECIES, P_CP, P_STAMINA, P_STAMINA_MAX, P_ID_MOVE_1, P_ID_MOVE_2, P_OWNER_NAME, P_HEIGHT, P_WEIGHT, P_IND_ATK, P_IND_DEF, P_IND_STM, P_CP_MULTIPLIER, P_UPGRADES, P_NICKNAME) VALUES ($id, $pkmn_id, $cp, $stm, $stm_max, $mv1, $mv2, $owner_name, $height, $weight, $ind_atk, $ind_def, $ind_stm, $cp_multiplier, $upgrades, $nickname)', {
-            $id: pkmn.id,
-            $pkmn_id: pkmn.pokemon_id,
-            $cp: pkmn.cp,
-            $stm: pkmn.pokemon_stamina,
-            $stm_max: pkmn.pokemon_stamina_max,
-            $mv1: pkmn.move1,
-            $mv2: pkmn.move2,
-            $owner_name: pkmn.owner,
-            $height: pkmn.height_m,
-            $weight: pkmn.weight_kg,
-            $ind_atk: pkmn.individual_attack,
-            $ind_def: pkmn.individual_defense,
-            $ind_stm: pkmn.individual_stamina,
-            $cp_multiplier: pkmn.cp_multiplier,
-            $upgrades: pkmn.number_upgrades,
-            $nickname: pkmn.nickname
-        }, callback);
+    storeGymPokemons: function (gym, timestamp) {
+        var memberships = gym.gym_state.memberships;
+        if (memberships) {
+            db.serialize(function () {
+                memberships.forEach(function (pkmn) {
+                    insertOrUpdatePkmn(pkmn.pokemon_data, function (err) {
+                        if (err) {
+                            console.log('[PogoBot].[ER_0021] - Unable to insert pokemon: ' + err);
+                        }
+                    });
+                    insertRelationship(pkmn.pokemon_data.id, gym.gym_state.fort_data.id, timestamp, function (err) {
+                        if (err) {
+                            console.log('[PogoBot].[ER_0022] - Unable to insert pokemon in gym_status: ' + err);
+                        }
+                    });
+                });
+            });
+        } else {
+            console.log('[PogoBot].[Database] - No pokemon to be stored');
+        }
     },
 
     close: function () {
@@ -157,5 +193,28 @@ module.exports = {
             }
             console.log('[PogoBot] - Species, DONE.');
         });
+    },
+
+    resetMoves: function () {
+        console.log('[PogoBot] - Reset of the moves database.');
+        db.serialize(function () {
+            db.run('DELETE FROM MOVES', function (err) {
+                if (err) {
+                    console.log('[PogoBot].[ER_0019] - Unable to delete moves: ' + err);
+                }
+            });
+            for (var i = 0; i < 400; i++) {
+                db.run('INSERT INTO MOVES (M_ID, M_NAME, M_TYPE) VALUES ($id, $name, $type)', {
+                    $id: i,
+                    $name: '?',
+                    $type: null
+                }, function (err) {
+                    if (err) {
+                        console.log('[PogoBot].[ER_0020] - Unable to insert new move: ' + err);
+                    }
+                });
+            }
+        });
+        console.log('[PogoBot] - Moves, DONE.');
     }
 };
