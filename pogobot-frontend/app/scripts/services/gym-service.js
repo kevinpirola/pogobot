@@ -11,6 +11,13 @@ angular.module('pogobotFrontendApp')
                 params: {
                     id: '@id'
                 }
+            },
+            getPokemonList: {
+                method: 'GET',
+                url: $location.protocol() + '://' + $location.host() + ':8080/api/gym/:id/pokemon',
+                params: {
+                    id: '@id'
+                }
             }
         });
     }]);

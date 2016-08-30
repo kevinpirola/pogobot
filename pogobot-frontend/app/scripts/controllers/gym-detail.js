@@ -12,6 +12,7 @@ angular.module('pogobotFrontendApp')
 
         var self = this;
         self.gym = {};
+        self.pokemons = [];
         self.id = $stateParams.id;
 
         self.nextLevelPoints = 0;
@@ -25,5 +26,11 @@ angular.module('pogobotFrontendApp')
             }, function (res) {
                 self.nextLevelPoints = res.data.L_MIN_POINTS;
             });
+        });
+
+        Gym.getPokemonList({
+            id: self.id
+        }, function (res) {
+            self.pokemons = res.data;
         });
     }]);

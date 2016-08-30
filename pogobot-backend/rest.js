@@ -308,7 +308,6 @@ router.route('/gym/:id')
     .get((req, res) => {
         db.getGymAndStatus(req.params.id, function (err, data) {
             if (!err) {
-                console.log(gyms[req.params.id].gym_state.memberships);
                 res.status(200).json({
                     data: data //gyms[req.params.id]
                 });

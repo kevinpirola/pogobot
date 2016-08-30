@@ -105,7 +105,7 @@ module.exports = {
     },
 
     getPokemons: function (id, callback) {
-        db.all('SELECT * FROM POKEMONS WHERE P_ID IN (SELECT GDP_ID_POKEMON FROM GYM_DATA_POKEMONS WHERE GDP_ID_GYM_DATA = (SELECT GD_ID FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1))', {
+        db.all('SELECT * FROM POKEMONS LEFT JOIN POKEMON_SPECIES ON PS_ID = P_ID_SPECIES WHERE P_ID IN (SELECT GDP_ID_POKEMON FROM GYM_DATA_POKEMONS WHERE GDP_ID_GYM_DATA = (SELECT GD_ID FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1))', {
             $id: id
         }, callback);
     },
@@ -151,8 +151,9 @@ module.exports = {
                     console.log('[PogoBot].[ER_0015] - Unable to delete types: ' + err);
                 }
             });
+            var stmt = db.prepare('INSERT INTO TYPES (T_ID, T_NAME, T_EFFICIENCY, T_COLOR) VALUES ($id, $name, $eff, $col)');
             types.forEach(function (t, index) {
-                db.run('INSERT INTO TYPES (T_ID, T_NAME, T_EFFICIENCY, T_COLOR) VALUES ($id, $name, $eff, $col)', {
+                stmt.run({
                     $id: (index + 1),
                     $name: t.name,
                     $eff: t.eff,
@@ -163,7 +164,9 @@ module.exports = {
                     }
                 });
             });
-            console.log('[PogoBot] - Types, DONE.');
+            stmt.finalize(function () {
+                console.log('[PogoBot] - Types, DONE.');
+            });
         });
     },
 
@@ -171,18 +174,20 @@ module.exports = {
         console.log('[PogoBot] - Creating default pokemon species data');
         var species = require(file);
         db.serialize(function () {
-            db.run('DELETE FROM POKEMON_SPECIES', function (err) {
+            db.run('DELETE FROM POKEMON_SPECIES', [], function (err) {
                 if (err) {
                     console.log('[PogoBot].[ER_0017] - Unable to delete species: ' + err);
                 }
+
             });
+            var stmt = db.prepare('INSERT INTO POKEMON_SPECIES VALUES ($id, $name, $rarity, (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type1), (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type2))');
             for (var sp in species) {
                 if (sp <= 151) {
-                    db.run('INSERT INTO POKEMON_SPECIES VALUES ($id, $name, $rarity, (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type1), (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type2))', {
+                    stmt.run({
                         $id: sp,
                         $name: species[sp].name,
                         $rarity: species[sp].rarity,
-                        $type1: species[sp].types[0].type,
+                        $type1: (species[sp].types.length > 1) ? species[sp].types[0].type : null,
                         $type2: (species[sp].types.length > 1) ? species[sp].types[1].type : null
                     }, function (err) {
                         if (err) {
@@ -191,7 +196,9 @@ module.exports = {
                     });
                 }
             }
-            console.log('[PogoBot] - Species, DONE.');
+            stmt.finalize(function () {
+                console.log('[PogoBot] - Species, DONE.');
+            });
         });
     },
 
