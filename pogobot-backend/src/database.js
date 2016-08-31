@@ -105,7 +105,7 @@ module.exports = {
     },
 
     getPokemons: function (id, callback) {
-        db.all('SELECT * FROM POKEMONS LEFT JOIN POKEMON_SPECIES ON PS_ID = P_ID_SPECIES WHERE P_ID IN (SELECT GDP_ID_POKEMON FROM GYM_DATA_POKEMONS WHERE GDP_ID_GYM_DATA = (SELECT GD_ID FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1))', {
+        db.all('SELECT * FROM POKEMONS LEFT JOIN POKEMON_SPECIES ON PS_ID = P_ID_SPECIES LEFT JOIN MOVES AS M1 ON P_ID_MOVE_1 = M1.M_ID LEFT JOIN MOVES AS M2 ON P_ID_MOVE_2 = M2.M_ID WHERE P_ID IN (SELECT GDP_ID_POKEMON FROM GYM_DATA_POKEMONS WHERE GDP_ID_GYM_DATA = (SELECT GD_ID FROM GYM_DATA WHERE GD_ID_GYM = $id ORDER BY GD_TIMESTAMP DESC LIMIT 1))', {
             $id: id
         }, callback);
     },
@@ -187,7 +187,7 @@ module.exports = {
                         $id: sp,
                         $name: species[sp].name,
                         $rarity: species[sp].rarity,
-                        $type1: (species[sp].types.length > 1) ? species[sp].types[0].type : null,
+                        $type1: (species[sp].types.length > 0) ? species[sp].types[0].type : null,
                         $type2: (species[sp].types.length > 1) ? species[sp].types[1].type : null
                     }, function (err) {
                         if (err) {

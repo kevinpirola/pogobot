@@ -10,7 +10,7 @@
             </md-card-title-text>
         </md-card-title>
         <md-card-content>
-            <div class="card" ng-repeat="pkmn in $ctrl.pokemons">
+            <div class="card" ng-repeat="pkmn in $ctrl.pokemons | orderBy:'P_CP':true">
                 <div class="card-title">
                     {{pkmn.PS_NAME}}
                 </div>
@@ -20,13 +20,16 @@
                 <div class="card-cp">
                     {{pkmn.P_CP}}</div>
 
-                <div class="card-content"></div>
+                <div class="card-content text-center">
+                    <h4>kevinpirola</h4></div>
 
                 <div class="card-action">
+<!--
                     <p>ATK: {{pkmn.P_IND_ATK}}</p>
-                    <p>DEF: {{pkmn.P_IND_DEF}}</p>
-                    <p>STM: {{pkmn.P_IND_STM}}</p>
-                    <p class="iv">IV: {{((pkmn.P_IND_ATK + pkmn.P_IND_DEF + pkmn.P_IND_STM) / 45) * 100 | number : 2}} %</p>
+<p>DEF: {{pkmn.P_IND_DEF}}</p>
+<p>STM: {{pkmn.P_IND_STM}}</p>
+<p class="iv">IV: {{((pkmn.P_IND_ATK + pkmn.P_IND_DEF + pkmn.P_IND_STM) / 45) * 100 | number : 2}} %</p>
+-->
                 </div>
             </div>
         </md-card-content>
