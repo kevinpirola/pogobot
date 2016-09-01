@@ -1,5 +1,6 @@
 const sqlite = require('sqlite3').verbose();
-const db = new sqlite.Database('pogobot.db');
+const path = require('path');
+const db = new sqlite.Database(path.join(__dirname, 'pogobot.db'));
 
 function insertGymIfNew(gym) {
     db.get('SELECT * FROM GYMS WHERE G_ID = $id LIMIT 1', {

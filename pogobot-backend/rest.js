@@ -7,14 +7,15 @@
  * @since 09/08/2016
  *
  */
+const path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var readline = require('readline');
 const pogobuf = require('pogobuf');
-const pokemonList = require('./res/pokemon.json');
+const pokemonList = require(path.join(__dirname, 'res/pokemon.json'));
 //const sqlite = require('sqlite3').verbose();
-//const db = new sqlite.Database('pogobot.db');
-const db = require('./src/database.js');
+//const db = new sqlite.Database(path.join(__dirname, 'pogobot.db'));
+const db = require(path.join(__dirname, 'src/database.js'));
 
 var app = express();
 
@@ -281,10 +282,10 @@ router.route('/user/:token/:lt/pkmns')
 
 var gyms = {};
 var $jsonfile = require('jsonfile');
-var gymsPath = $jsonfile.readFileSync('./res/path.json');
+var gymsPath = $jsonfile.readFileSync(path.join(__dirname, 'res/path.json'));
 var gymsPathStep = 0;
-const $move = require('./src/move_manager.js');
-const $gym = require('./src/gym.js');
+const $move = require(path.join(__dirname, 'src/move_manager.js'));
+const $gym = require(path.join(__dirname, 'src/gym.js'));
 var gymsClient;
 var speed = 100;
 
