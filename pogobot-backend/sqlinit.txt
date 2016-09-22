@@ -67,21 +67,23 @@ CREATE TABLE MOVES (
     FOREIGN KEY (M_TYPE) REFERENCES TYPES(T_ID)
 );
 
---MOVE:
-82 - dragon pulse
-234 - lick
-131 - body slam
-95 - bulldoze
-116 - solar beam
-239 - steel wing
-14 - hyper beam
-235 - confusion
-59 - seed bomb
-230 - water gun
-108 - psychic
-39 - Ice beam
-202 - bite
-80 - twister
+/*
+* MOVE:
+* 82 - dragon pulse
+* 234 - lick
+* 131 - body slam
+* 95 - bulldoze
+* 116 - solar beam
+* 239 - steel wing
+* 14 - hyper beam
+* 235 - confusion
+* 59 - seed bomb
+* 230 - water gun
+* 108 - psychic
+* 39 - Ice beam
+* 202 - bite
+* 80 - twister
+*/
 
 CREATE TABLE POKEMONS (
     P_ID STRING PRIMARY KEY,
@@ -113,35 +115,37 @@ CREATE TABLE GYM_DATA_POKEMONS (
     FOREIGN KEY (GDP_ID_POKEMON) REFERENCES GYM_DATA(P_ID)
 );
 
-{ pokemon_data: 
-     { id: '5998407366853986344',
-       pokemon_id: 18,
-       cp: 1448,
-       stamina: 238,
-       stamina_max: 238,
-       move_1: 210,
-       move_2: 122,
-       deployed_fort_id: '',
-       owner_name: 'ziotob',
-       is_egg: false,
-       egg_km_walked_target: 0,
-       egg_km_walked_start: 0,
-       origin: 0,
-       height_m: 1.2846184968948364,
-       weight_kg: 32.53230285644531,
-       individual_attack: 14,
-       individual_defense: 13,
-       individual_stamina: 15,
-       cp_multiplier: 0.5974000096321106,
-       pokeball: 1,
-       captured_cell_id: 0,
-       battles_attacked: 51,
-       battles_defended: 0,
-       egg_incubator_id: '',
-       creation_time_ms: 1470394101698,
-       num_upgrades: 9,
-       additional_cp_multiplier: 0.06381925195455551,
-       favorite: 1,
-       nickname: '',
-       from_fort: 1 },
-    trainer_public_profile: { name: 'ziotob', level: 23, avatar: [Object] } },
+/*
+* { pokemon_data: 
+*     { id: '5998407366853986344',
+*       pokemon_id: 18,
+*       cp: 1448,
+*       stamina: 238,
+*       stamina_max: 238,
+*       move_1: 210,
+*       move_2: 122,
+*       deployed_fort_id: '',
+*       owner_name: 'ziotob',
+*       is_egg: false,
+*       egg_km_walked_target: 0,
+*       egg_km_walked_start: 0,
+*       origin: 0,
+*       height_m: 1.2846184968948364,
+*       weight_kg: 32.53230285644531,
+*       individual_attack: 14,
+*       individual_defense: 13,
+*       individual_stamina: 15,
+*       cp_multiplier: 0.5974000096321106,
+*       pokeball: 1,
+*       captured_cell_id: 0,
+*       battles_attacked: 51,
+*       battles_defended: 0,
+*       egg_incubator_id: '',
+*       creation_time_ms: 1470394101698,
+*       num_upgrades: 9,
+*       additional_cp_multiplier: 0.06381925195455551,
+*       favorite: 1,
+*       nickname: '',
+*       from_fort: 1 },
+*    trainer_public_profile: { name: 'ziotob', level: 23, avatar: [Object] } },
+*/
