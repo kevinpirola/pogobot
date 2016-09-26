@@ -3,7 +3,7 @@ pogobot:
   environment:
     NODE_ENV: development
   ports:
-    - '9000:8000'
+    - '8000:9000'
   volumes: 
     - .:/home/app/pogobot
     - /home/app/pogobot/node_modules

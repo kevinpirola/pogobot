@@ -197,4 +197,26 @@ md-card[md-ink-ripple] {
     .jumbotron {
         border-bottom: 0;
     }
+
+    .progress.distribution.bar {
+        width: 100%;
+    }
+}
+
+.progress.distribution-bar {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.blue-bar {
+    background-color: #0677EE;
+}
+
+.red-bar {
+    background-color: #F3150A;
+}
+
+.yellow-bar {
+    background-color: #FBD208;
+    color: black;
 }

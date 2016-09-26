@@ -1,4 +1,9 @@
 <md-content>
     <h2 class="text-center">List of Gyms</h2>
+    <div class="progress distribution-bar">
+        <div ng-repeat="bar in $ctrl.distribution" class="progress-bar" ng-class="bar.class" ng-style="{width: (bar.value + '%')}">
+            {{bar.value | number:1}}%
+        </div>
+    </div>
     <gym ng-repeat="g in $ctrl.gyms" gym="g"></gym>
 </md-content>
