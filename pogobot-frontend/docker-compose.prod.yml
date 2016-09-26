@@ -1,0 +1,7 @@
+pogobot:
+  build: .
+  command: bash -c "/usr/local/bin/grunt build; cd dist; /usr/local/bin/simplehttpserver ."
+  environment:
+    NODE_ENV: production 
+  ports:
+    - '8000:8000'

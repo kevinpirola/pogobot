@@ -1,0 +1,10 @@
+pogobot:
+  build: .
+  environment:
+    NODE_ENV: development
+  ports:
+    - '9000:8000'
+  volumes: 
+    - .:/home/app/pogobot
+    - /home/app/pogobot/node_modules
+    - /home/app/pogobot/bower_components
