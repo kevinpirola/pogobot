@@ -13,8 +13,7 @@ var bodyParser = require('body-parser');
 var readline = require('readline');
 const pogobuf = require('pogobuf');
 const pokemonList = require(path.join(__dirname, 'res/pokemon.json'));
-//const sqlite = require('sqlite3').verbose();
-//const db = new sqlite.Database(path.join(__dirname, 'pogobot.db'));
+const CONFIG = require(path.join(__dirname, 'conf/config.json'));
 const db = require(path.join(__dirname, 'src/database.js'));
 
 var app = express();
@@ -61,6 +60,7 @@ User.prototype.getToken = function () {
 /////// PARAMETERS ///////
 var argv = require('minimist')(process.argv.slice(2));
 
+/*
 if (!argv.u) {
     console.log('[PogoBot].[ER_0001] You should specify a username using: -u <yourUsername>');
     process.exit(1);
@@ -69,6 +69,7 @@ if (!argv.p) {
     console.log('[PogoBot].[ER_0002] You should specify a password using: -p <yourPassword>');
     process.exit(1);
 }
+*/
 
 var login, loginMethod;
 
@@ -282,7 +283,7 @@ router.route('/user/:token/:lt/pkmns')
 
 var gyms = {};
 var $jsonfile = require('jsonfile');
-var gymsPath = $jsonfile.readFileSync(path.join(__dirname, 'res/path.json'));
+var gymsPath = $jsonfile.readFileSync(path.join(__dirname, 'conf/path.json'));
 var gymsPathStep = 0;
 const $move = require(path.join(__dirname, 'src/move_manager.js'));
 const $gym = require(path.join(__dirname, 'src/gym.js'));
@@ -380,9 +381,13 @@ function startGymsDaemon() {
 function initClient() {
     gymsClient = new pogobuf.Client();
 
-    return login.login(argv.u, argv.p)
+    return login.login(CONFIG.username, CONFIG.password)
         .then(token => {
-            console.log('[PogoBuf].[GymsDaemon] - Login Successful for ' + argv.u);
+            console.log('[PogoBuf].[GymsDaemon] - Login Successful for ' + CONFIG.username);
+            if(CONFIG.proxy){
+console.log("USING PROXY");
+                gymsClient.setProxy(CONFIG.proxy);
+            }
             gymsClient.setAuthInfo(loginMethod, token);
             gymsClient.setPosition(gymsPath[gymsPathStep].lat, gymsPath[gymsPathStep].lon);
             return gymsClient.init();

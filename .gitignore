@@ -36,7 +36,10 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
+#INSTANCE DB
 /*.db
 pogobot.db
 pogobot.db-journal
 
+#INSTANCE CONFIG
+config.json
