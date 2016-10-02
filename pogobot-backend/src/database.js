@@ -1,7 +1,29 @@
 const fs = require('fs');
 const sqlite = require('sqlite3').verbose();
 const path = require('path');
-const db = new sqlite.Database(path.join(__dirname, '../db/pogobot.db'));
+var db = null; //new sqlite.Database(path.join(__dirname, '../db/pogobot.db'));
+
+/*fs.stat(path.join(__dirname, '../db/pogobot.db'), fs.constants.F_OK, function(err) {
+    db = new sqlite.Database(path.join(__dirname, '../db/pogobot.db'));
+    if(err) {
+        initDatabase();
+    }
+});*/
+
+function initDatabase(callback) {
+    console.log('[PogoBot].[Database] - Initializing a new database');
+    var sql = fs.readFileSync(path.join(__dirname, '../db/sqlinit.txt')).toString();
+    db.serialize(function() {
+        db.exec(sql, function(err) {
+            if(err) {
+                console.log('[PogoBot].[Database] - Error while initializing the db');
+            }
+        });
+        defaultTypes('../res/types.json');
+        defaultSpecies('../res/pokemon.json');
+        defaultMoves(callback);
+    });
+};
 
 function insertGymIfNew(gym) {
     db.get('SELECT * FROM GYMS WHERE G_ID = $id LIMIT 1', {
@@ -67,7 +89,100 @@ function insertRelationship(pkmn_id, gym_id, timestamp, callback) {
     }, callback);
 };
 
+function defaultTypes(file) {
+    console.log('[PogoBot] - Creating default types');
+    var types = require(file);
+    //db.serialize(function () {
+        db.run('DELETE FROM TYPES', function (err) {
+            if (err) {
+                console.log('[PogoBot].[ER_0015] - Unable to delete types: ' + err);
+            }
+        });
+        var stmt = db.prepare('INSERT INTO TYPES (T_ID, T_NAME, T_EFFICIENCY, T_COLOR) VALUES ($id, $name, $eff, $col)');
+        types.forEach(function (t, index) {
+            stmt.run({
+                $id: (index + 1),
+                $name: t.name,
+                $eff: t.eff,
+                $col: t.color
+            }, function (err) {
+                if (err) {
+                    console.log('[PogoBot].[ER_0016] - Unable to insert new type: ' + err);
+                }
+            });
+        });
+        stmt.finalize(function () {
+            console.log('[PogoBot] - Types, DONE.');
+        });
+    //});
+};
+
+function defaultSpecies (file) {
+    console.log('[PogoBot] - Creating default pokemon species data');
+    var species = require(file);
+    //db.serialize(function () {
+        db.run('DELETE FROM POKEMON_SPECIES', [], function (err) {
+            if (err) {
+                console.log('[PogoBot].[ER_0017] - Unable to delete species: ' + err);
+            }
+        });
+        var stmt = db.prepare('INSERT INTO POKEMON_SPECIES VALUES ($id, $name, $rarity, (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type1), (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type2))');
+        for (var sp in species) {
+            if (sp <= 151) {
+                stmt.run({
+                    $id: sp,
+                    $name: species[sp].name,
+                    $rarity: species[sp].rarity,
+                    $type1: (species[sp].types.length > 0) ? species[sp].types[0].type : null,
+                    $type2: (species[sp].types.length > 1) ? species[sp].types[1].type : null
+                }, function (err) {
+                    if (err) {
+                        console.log('[PogoBot].[ER_0018] - Unable to insert new specie: ' + err);
+                    }
+                });
+            }
+        }
+        stmt.finalize(function () {
+            console.log('[PogoBot] - Species, DONE.');
+        });
+    //});
+};
+
+function defaultMoves (callback) {
+    console.log('[PogoBot] - Reset of the moves database.');
+//    db.serialize(function () {
+        db.run('DELETE FROM MOVES', function (err) {
+            if (err) {
+                console.log('[PogoBot].[ER_0019] - Unable to delete moves: ' + err);
+            }
+        });
+        for (var i = 0; i < 400; i++) {
+            db.run('INSERT INTO MOVES (M_ID, M_NAME, M_TYPE) VALUES ($id, $name, $type)', {
+                $id: i,
+                $name: '?',
+                $type: null
+            }, function (err) {
+                if (err) {
+                    console.log('[PogoBot].[ER_0020] - Unable to insert new move: ' + err);
+                }
+            });
+        }
+  //  });
+    console.log('[PogoBot] - Moves, DONE.');
+    callback();
+};
+
+
 module.exports = {
+
+    initialize: function(callback) {
+        fs.stat(path.join(__dirname, '../db/pogobot.db')/*, fs.constants.F_OK*/, function(err) {
+            db = new sqlite.Database(path.join(__dirname, '../db/pogobot.db'));
+            if(err) {
+                initDatabase(callback);
+            }
+        });
+    },
 
     storeGymAndData: function (gym, timestamp) {
         db.serialize(function () {
@@ -144,86 +259,15 @@ module.exports = {
         db.close();
     },
 
-    populateTypes: function (file) {
-        console.log('[PogoBot] - Creating default types');
-        var types = require(file);
-        db.serialize(function () {
-            db.run('DELETE FROM TYPES', function (err) {
-                if (err) {
-                    console.log('[PogoBot].[ER_0015] - Unable to delete types: ' + err);
-                }
-            });
-            var stmt = db.prepare('INSERT INTO TYPES (T_ID, T_NAME, T_EFFICIENCY, T_COLOR) VALUES ($id, $name, $eff, $col)');
-            types.forEach(function (t, index) {
-                stmt.run({
-                    $id: (index + 1),
-                    $name: t.name,
-                    $eff: t.eff,
-                    $col: t.color
-                }, function (err) {
-                    if (err) {
-                        console.log('[PogoBot].[ER_0016] - Unable to insert new type: ' + err);
-                    }
-                });
-            });
-            stmt.finalize(function () {
-                console.log('[PogoBot] - Types, DONE.');
-            });
-        });
+    populateTypes: function(file) {
+        defaultTypes(file);
     },
 
     populateSpecies: function (file) {
-        console.log('[PogoBot] - Creating default pokemon species data');
-        var species = require(file);
-        db.serialize(function () {
-            db.run('DELETE FROM POKEMON_SPECIES', [], function (err) {
-                if (err) {
-                    console.log('[PogoBot].[ER_0017] - Unable to delete species: ' + err);
-                }
-
-            });
-            var stmt = db.prepare('INSERT INTO POKEMON_SPECIES VALUES ($id, $name, $rarity, (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type1), (SELECT T_ID FROM TYPES WHERE T_NAME LIKE $type2))');
-            for (var sp in species) {
-                if (sp <= 151) {
-                    stmt.run({
-                        $id: sp,
-                        $name: species[sp].name,
-                        $rarity: species[sp].rarity,
-                        $type1: (species[sp].types.length > 0) ? species[sp].types[0].type : null,
-                        $type2: (species[sp].types.length > 1) ? species[sp].types[1].type : null
-                    }, function (err) {
-                        if (err) {
-                            console.log('[PogoBot].[ER_0018] - Unable to insert new specie: ' + err);
-                        }
-                    });
-                }
-            }
-            stmt.finalize(function () {
-                console.log('[PogoBot] - Species, DONE.');
-            });
-        });
+        defaultSpecies(file);
     },
 
     resetMoves: function () {
-        console.log('[PogoBot] - Reset of the moves database.');
-        db.serialize(function () {
-            db.run('DELETE FROM MOVES', function (err) {
-                if (err) {
-                    console.log('[PogoBot].[ER_0019] - Unable to delete moves: ' + err);
-                }
-            });
-            for (var i = 0; i < 400; i++) {
-                db.run('INSERT INTO MOVES (M_ID, M_NAME, M_TYPE) VALUES ($id, $name, $type)', {
-                    $id: i,
-                    $name: '?',
-                    $type: null
-                }, function (err) {
-                    if (err) {
-                        console.log('[PogoBot].[ER_0020] - Unable to insert new move: ' + err);
-                    }
-                });
-            }
-        });
-        console.log('[PogoBot] - Moves, DONE.');
+        defaultMoves();
     }
 };

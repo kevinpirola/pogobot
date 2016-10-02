@@ -18,6 +18,8 @@ const db = require(path.join(__dirname, 'src/database.js'));
 
 var app = express();
 
+db.initialize(startGymsDaemon);
+
 ////////// USER //////////
 
 function User(u, p) {
@@ -428,7 +430,7 @@ function gyms_loop() {
     });
 }
 
-startGymsDaemon();
+//startGymsDaemon();
 
 /****************END GYM ****************/
 
