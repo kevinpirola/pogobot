@@ -3,7 +3,7 @@
 NOTE: Using third party application is against the term of service of Niantic's Pokemon GO game. This entire project is created only for educational purpose and it depends on others' works to fetch data from the game. There is the possibility that those project change or will be closed. We are not developing them and we are not responsible fot that.
 
 == Introduction
-I am a pokémon fan, I am a Pokémon Go player, I am a software developer, I am an open source fan.
+We are two pokémon fans, we are two Pokémon Go players, we are two software developers, we are two open source fans.
 The aim of this project is to create something that can (but should not) be used by Pokémon Go player in order to improve their game experience.
 Of course the final goal is to be the definitive Bot, in a first moment it will be just a bunch of useful tools.
 
@@ -59,12 +59,14 @@ The Gym Controller is a tool that allows you to keep track of the gyms in a city
 
  [X] Walk around in a chosen loop
  [X] Fetch Gyms simple data (team, points and level)
- [ ] Fetch Gym Leader data (pokemon, nickname, level)
+ [X] Fetch Gym Leader data (pokemon, nickname, level)
  [ ] Fetch all pokemon data (CP, IV and attacks)
  [ ] Fetch real time data (is in combat, is being trained or beated)
  [ ] Keep white (BOT)
  [ ] Keep chosen color (BOT)
  [ ] Automatic Train (BOT)
+ [ ] Loop selection
+ [ ] Multi-user Bot with managing features
  
 == Installation and run
 To run the application on your laptop there are a variety of pre-requisite that you need to fulfill.
