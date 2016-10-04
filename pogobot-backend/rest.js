@@ -295,13 +295,13 @@ function gyms_loop() {
                 gym.visit_timestamp = new Date().getTime();
                 gyms[gym.gym_state.fort_data.id] = gym;
                 // STORE IN DB //
-		db.storeGymDataAndPokemons(gym, timestamp);
+		        db.storeGymDataAndPokemons(gym, timestamp);
             });
         } else {
             loopGyms.visit_timestamp = new Date().getTime();
             gyms[loopGyms.gym_state.fort_data.id] = loopGyms;
             // STORE IN DB //
-	    db.storeGymDataAndPokemons(gym, timestamp);
+	        db.storeGymDataAndPokemons(loopGyms, timestamp);
         }
 
         var newGymsPathStep = (gymsPathStep + 1) % gymsPath.length;
@@ -309,7 +309,8 @@ function gyms_loop() {
         gymsPathStep = newGymsPathStep;
         return promise;
     }).then(() => {
-        gyms_loop();
+        gyms_loop(); 
+        return null;
     }).catch((err) => {
         console.log('[PogoBuf].[ER_0000].[GymsDaemon] - An error occurred or Token not valid, reinitializing daemon' + err);
         startGymsDaemon();

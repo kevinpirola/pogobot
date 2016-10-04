@@ -18,7 +18,7 @@ function initDatabase(callback) {
     });
 };
 
-function insertGymIfNew(gym) {
+function insertGymIfNew(gym, callback) {
     db.get('SELECT * FROM GYMS WHERE G_ID = $id LIMIT 1', {
         $id: gym.gym_state.fort_data.id
     }, function (err, row) {
@@ -31,7 +31,9 @@ function insertGymIfNew(gym) {
                     $lon: gym.gym_state.fort_data.longitude,
                     $name: gym.name,
                     $img: gym.urls[0]
-                });
+                }, {}, callback);
+            } else {
+                callback();
             }
         } else {
             console.log('[PogoBot].[ER_0004] - Error while checking if gym exists: ' + err);
@@ -39,7 +41,7 @@ function insertGymIfNew(gym) {
     });
 };
 
-function insertGymData(gym, timestamp) {
+function insertGymData(gym, timestamp, callback) {
     db.get('SELECT * FROM GYM_DATA WHERE GD_ID_GYM = $id AND GD_POINTS != $points ORDER BY GD_TIMESTAMP DESC LIMIT 1', {
 	$id: gym.gym_state.fort_data.id,
 	$points: gym.gym_state.fort_data.gym_points
@@ -47,11 +49,11 @@ function insertGymData(gym, timestamp) {
 	var gymPoints = gym.gym_state.fort_data.gym_points * 1;
 	var rowPoints = (row ? row.GD_POINTS : gymPoints) * 1;
 	gym.growing = gymPoints > rowPoints ? 1 : gymPoints < rowPoints ? 2 : 0;
-
+        callback();
     });
 }
 
-function insertNewDataUpdate(gym, timestamp) {
+function insertNewDataUpdate(gym, timestamp, callback) {
     db.run('INSERT INTO GYM_DATA (GD_ID_GYM, GD_TIMESTAMP, GD_POINTS, GD_LEVEL, GD_OWNER_TEAM, GD_IS_IN_BATTLE, GD_IS_GROWING) VALUES ($id, $time, $points, (SELECT L_ID FROM LEVELS WHERE $points >= L_MIN_POINTS ORDER BY L_MIN_POINTS DESC LIMIT 1), $owner, $inbattle, $growing)', {
         $id: gym.gym_state.fort_data.id,
         $time: timestamp,
@@ -62,6 +64,8 @@ function insertNewDataUpdate(gym, timestamp) {
     }, function (err) {
         if (err) {
             console.log('[PogoBot].[ER_0005] - Error while inserting new gym data: ' + err);
+        } else {
+            callback();
         }
     });
 };
@@ -207,11 +211,13 @@ function storeGymPokemons (gym, timestamp) {
     };
 
 
-    function storeGymAndData (gym, timestamp) {
-        db.serialize(function () {
-            insertGymIfNew(gym);
-            insertGymData(gym, timestamp);
-	    insertNewDataUpdate(gym, timestamp);
+    function storeGymAndData (gym, timestamp, callback) {
+        insertGymIfNew(gym, function() {
+            insertGymData(gym, timestamp, function() {
+                insertNewDataUpdate(gym, timestamp, function(){
+                    callback();
+                });
+            });
         });
     };
 
@@ -271,10 +277,9 @@ module.exports = {
     },
 
     storeGymDataAndPokemons: function (gym, timestamp) {
-	db.serialize(function () {
-	    storeGymAndData(gym, timestamp);
-	    storeGymPokemons(gym, timestamp);
-	});
+        storeGymAndData(gym, timestamp, function(){
+            storeGymPokemons(gym, timestamp);
+        });
     },
 
 
