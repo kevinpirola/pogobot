@@ -21,11 +21,8 @@ angular.module('pogobotFrontendApp')
             id: self.id
         }, function (res) {
             self.gym = res.data;
-            Level.get({
-                id: (self.gym.GD_LEVEL < 10) ? self.gym.GD_LEVEL + 1 : self.gym.GD_LEVEL
-            }, function (res) {
-                self.nextLevelPoints = res.data.L_MIN_POINTS;
-            });
+            var level = Level.get((self.gym.GD_LEVEL < 10) ? self.gym.GD_LEVEL + 1 : self.gym.GD_LEVEL);
+            self.nextLevelPoints = level.L_MIN_POINTS;
         });
 
         Gym.getPokemonList({

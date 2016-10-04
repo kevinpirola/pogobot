@@ -21,7 +21,7 @@ angular.module('pogobotFrontendApp')
 	    self.distribution[1].value = 0;
 	    self.distribution[2].value = 0;
 
-	    angular.forEach(self.gyms, function(value, key){
+	    angular.forEach(self.gyms, function(value){
 		if(value.GD_OWNER_TEAM === 1){
 		    self.distribution[0].value += (1 / self.gyms.length) * 100;	
 		} else if (value.GD_OWNER_TEAM === 2) {
@@ -30,7 +30,6 @@ angular.module('pogobotFrontendApp')
 		    self.distribution[2].value += (1 / self.gyms.length) * 100;	
 		}
 	    });
-console.log(self.distribution);
         });
 
     }]);

@@ -244,9 +244,9 @@ router.route('/gym/:id/growing')
         });
     });
 
-router.route('/level/:id')
+router.route('/levels')
     .get((req, res) => {
-        db.getLevel(req.params.id, function (err, data) {
+        db.getLevel(function (err, data) {
             if (!err) {
                 res.status(200).json({
                     data: data
@@ -295,15 +295,13 @@ function gyms_loop() {
                 gym.visit_timestamp = new Date().getTime();
                 gyms[gym.gym_state.fort_data.id] = gym;
                 // STORE IN DB //
-                db.storeGymAndData(gym, timestamp);
-                db.storeGymPokemons(gym, timestamp);
+		db.storeGymDataAndPokemons(gym, timestamp);
             });
         } else {
             loopGyms.visit_timestamp = new Date().getTime();
             gyms[loopGyms.gym_state.fort_data.id] = loopGyms;
             // STORE IN DB //
-            db.storeGymAndData(loopGyms, timestamp);
-            db.storeGymPokemons(loopGyms, timestamp);
+	    db.storeGymDataAndPokemons(gym, timestamp);
         }
 
         var newGymsPathStep = (gymsPathStep + 1) % gymsPath.length;

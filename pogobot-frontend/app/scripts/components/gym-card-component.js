@@ -6,21 +6,14 @@ angular.module('pogobotFrontendApp')
         bindings: {
             gym: '='
         },
-        controller: ['Level', 'Gym', function (Level, Gym) {
+        controller: ['Level', function (Level) {
             var self = this;
             self.nextLevelPoints = 0;
 
-            Level.get({
-                id: (self.gym.GD_LEVEL < 10) ? self.gym.GD_LEVEL + 1 : self.gym.GD_LEVEL
-            }, function (res) {
-                self.nextLevelPoints = res.data.L_MIN_POINTS;
-            });
-
-            Gym.growing({
-                id: self.gym.G_ID
-            }, function (res) {
-                self.growing = res.growing;
-            });
+            var level = Level.get((self.gym.GD_LEVEL < 10) ? self.gym.GD_LEVEL + 1 : self.gym.GD_LEVEL);
+            self.nextLevelPoints = level.L_MIN_POINTS;
+	    
+	    self.growing = self.gym.GD_IS_GROWING;
 
             self.getTeam = function (id) {
                 var ret = '';

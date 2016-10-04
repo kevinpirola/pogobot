@@ -39,13 +39,26 @@ function insertGymIfNew(gym) {
     });
 };
 
+function insertGymData(gym, timestamp) {
+    db.get('SELECT * FROM GYM_DATA WHERE GD_ID_GYM = $id AND GD_POINTS != $points ORDER BY GD_TIMESTAMP DESC LIMIT 1', {
+	$id: gym.gym_state.fort_data.id,
+	$points: gym.gym_state.fort_data.gym_points
+    }, function (err, row) {
+	var gymPoints = gym.gym_state.fort_data.gym_points * 1;
+	var rowPoints = (row ? row.GD_POINTS : gymPoints) * 1;
+	gym.growing = gymPoints > rowPoints ? 1 : gymPoints < rowPoints ? 2 : 0;
+
+    });
+}
+
 function insertNewDataUpdate(gym, timestamp) {
-    db.run('INSERT INTO GYM_DATA (GD_ID_GYM, GD_TIMESTAMP, GD_POINTS, GD_LEVEL, GD_OWNER_TEAM, GD_IS_IN_BATTLE) VALUES ($id, $time, $points, (SELECT L_ID FROM LEVELS WHERE $points >= L_MIN_POINTS ORDER BY L_MIN_POINTS DESC LIMIT 1), $owner, $inbattle)', {
+    db.run('INSERT INTO GYM_DATA (GD_ID_GYM, GD_TIMESTAMP, GD_POINTS, GD_LEVEL, GD_OWNER_TEAM, GD_IS_IN_BATTLE, GD_IS_GROWING) VALUES ($id, $time, $points, (SELECT L_ID FROM LEVELS WHERE $points >= L_MIN_POINTS ORDER BY L_MIN_POINTS DESC LIMIT 1), $owner, $inbattle, $growing)', {
         $id: gym.gym_state.fort_data.id,
         $time: timestamp,
         $points: gym.gym_state.fort_data.gym_points,
         $owner: gym.gym_state.fort_data.owned_by_team,
-        $inbattle: gym.gym_state.fort_data.is_in_battle
+        $inbattle: gym.gym_state.fort_data.is_in_battle,
+	$growing: gym.growing
     }, function (err) {
         if (err) {
             console.log('[PogoBot].[ER_0005] - Error while inserting new gym data: ' + err);
@@ -171,6 +184,36 @@ function defaultMoves(callback) {
     });
 };
 
+function storeGymPokemons (gym, timestamp) {
+        var memberships = gym.gym_state.memberships;
+        if (memberships) {
+            db.serialize(function () {
+                memberships.forEach(function (pkmn) {
+                    insertOrUpdatePkmn(pkmn.pokemon_data, function (err) {
+                        if (err) {
+                            console.log('[PogoBot].[ER_0021] - Unable to insert pokemon: ' + err);
+                        }
+                    });
+                    insertRelationship(pkmn.pokemon_data.id, gym.gym_state.fort_data.id, timestamp, function (err) {
+                        if (err) {
+                            console.log('[PogoBot].[ER_0022] - Unable to insert pokemon in gym_status: ' + err);
+                        }
+                    });
+                });
+            });
+        } else {
+            console.log('[PogoBot].[Database] - No pokemon to be stored');
+        }
+    };
+
+
+    function storeGymAndData (gym, timestamp) {
+        db.serialize(function () {
+            insertGymIfNew(gym);
+            insertGymData(gym, timestamp);
+	    insertNewDataUpdate(gym, timestamp);
+        });
+    };
 
 module.exports = {
 
@@ -185,12 +228,7 @@ module.exports = {
         });
     },
 
-    storeGymAndData: function (gym, timestamp) {
-        db.serialize(function () {
-            insertGymIfNew(gym);
-            insertNewDataUpdate(gym, timestamp);
-        });
-    },
+
 
     getGyms: function (callback) {
         db.all(' SELECT * FROM GYMS)', callback);
@@ -228,33 +266,18 @@ module.exports = {
         }, callback);
     },
 
-    getLevel: function getLevel(lvl, callback) {
-        db.get('SELECT * FROM LEVELS WHERE L_ID = $lvl', {
-            $lvl: lvl
-        }, callback);
+    getLevel: function getLevel(callback) {
+        db.all('SELECT * FROM LEVELS;', {}, callback);
     },
 
-    storeGymPokemons: function (gym, timestamp) {
-        var memberships = gym.gym_state.memberships;
-        if (memberships) {
-            db.serialize(function () {
-                memberships.forEach(function (pkmn) {
-                    insertOrUpdatePkmn(pkmn.pokemon_data, function (err) {
-                        if (err) {
-                            console.log('[PogoBot].[ER_0021] - Unable to insert pokemon: ' + err);
-                        }
-                    });
-                    insertRelationship(pkmn.pokemon_data.id, gym.gym_state.fort_data.id, timestamp, function (err) {
-                        if (err) {
-                            console.log('[PogoBot].[ER_0022] - Unable to insert pokemon in gym_status: ' + err);
-                        }
-                    });
-                });
-            });
-        } else {
-            console.log('[PogoBot].[Database] - No pokemon to be stored');
-        }
+    storeGymDataAndPokemons: function (gym, timestamp) {
+	db.serialize(function () {
+	    storeGymAndData(gym, timestamp);
+	    storeGymPokemons(gym, timestamp);
+	});
     },
+
+
 
     close: function () {
         db.close();
