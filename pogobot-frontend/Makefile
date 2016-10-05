@@ -18,6 +18,9 @@ status:
 cli:
 	@docker-compose run --rm pogobot /bin/bash
 
+cli-prod:
+	@docker-compose -f docker-compose.prod.yml run --rm pogobot /bin/bash
+
 restart:
 	@docker-compose stop pogobot
 	@docker-compose start pogobot
