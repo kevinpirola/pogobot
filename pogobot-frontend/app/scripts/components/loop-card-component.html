@@ -1,0 +1,10 @@
+<md-card md-ink-ripple md-theme="default" md-theme-watch ui-sref="gyms({lid: $ctrl.loop.LP_ID})">
+    <md-card-title>
+        <md-card-title-text>
+            <span class="md-title">{{$ctrl.loop.LP_NAME}}</span>
+        </md-card-title-text>
+        <md-card-title-media>
+            <div class="md-media-sm card-media"><img ng-src="{{($ctrl.loop.LP_IMG) ? $ctrl.loop.LP_IMG : '../images/loop.png'}}"></div>
+        </md-card-title-media>
+    </md-card-title>
+</md-card>

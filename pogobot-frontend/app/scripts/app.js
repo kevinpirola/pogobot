@@ -28,14 +28,20 @@ angular
                 controller: 'MainCtrl',
                 controllerAs: 'main'
             })
+            .state('loops', {
+                url: '/loops',
+                templateUrl: 'views/loops.html',
+                controller: 'LoopsCtrl',
+                controllerAs: '$ctrl'
+            })
             .state('gyms', {
-                url: '/gyms',
+                url: '/loops/:lid',
                 templateUrl: 'views/gyms.html',
                 controller: 'GymsCtrl',
                 controllerAs: '$ctrl'
             })
             .state('details', {
-                url: '/gyms/:id',
+                url: '/gym/:gid',
                 templateUrl: 'views/gym-details.html',
                 controller: 'GymDetailCtrl',
                 controllerAs: '$ctrl'
@@ -45,44 +51,10 @@ angular
                 templateUrl: 'views/about.html'
             });
 
-}])
+    }])
     .config(['$mdIconProvider', function ($mdIconProvider) {
         $mdIconProvider.defaultIconSet('images/mdi.svg');
     }])
-    /*.config(function ($routeProvider) {
-        $routeProvider
-            .when('/', {
-                templateUrl: 'views/main.html',
-                controller: 'MainCtrl',
-                controllerAs: 'main'
-            })
-            .when('/about', {
-                templateUrl: 'views/about.html',
-                controller: 'AboutCtrl',
-                controllerAs: 'about'
-            })
-            .when('/access_token=:accessToken', {
-                template: '',
-                controller: function ($location, $rootScope) {
-                    var hash = $location.path().substr(1);
-
-                    var splitted = hash.split('&');
-                    var params = {};
-
-                    for (var i = 0; i < splitted.length; i++) {
-                        var param = splitted[i].split('=');
-                        var key = param[0];
-                        var value = param[1];
-                        params[key] = value;
-                        $rootScope.accesstoken = params;
-                    }
-                    $location.path('/about');
-                }
-            })
-            .otherwise({
-                redirectTo: '/'
-            });
-    })*/
     .config(['$httpProvider', function ($httpProvider) {
         //Http Intercpetor to check auth failures for xhr requests
         $httpProvider.interceptors.push('authHttpResponseInterceptor');

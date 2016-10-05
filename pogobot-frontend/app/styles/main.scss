@@ -53,6 +53,10 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/boots
     }
 }
 
+loop .card-media img {
+    width: 80px;
+}
+
 .card .card-image img {
     border-radius: 2px 2px 0 0;
     background-clip: padding-box;
@@ -197,7 +201,6 @@ md-card[md-ink-ripple] {
     .jumbotron {
         border-bottom: 0;
     }
-
     .progress.distribution.bar {
         width: 100%;
     }

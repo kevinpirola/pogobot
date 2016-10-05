@@ -13,7 +13,7 @@ angular.module('pogobotFrontendApp')
         var self = this;
         self.gym = {};
         self.pokemons = [];
-        self.id = $stateParams.id;
+        self.id = $stateParams.gid;
 
         self.nextLevelPoints = 0;
 
